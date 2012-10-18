@@ -17,7 +17,7 @@ function($, _, Backbone) {
       notLoggedIn: 'Login to continue...',
       loaded: false,
       pic: "",
-      code_img: "http://placehold.it/400x400"
+      code_img: "http://placehold.it/360x360"
     },
 
     initialize: function() {
