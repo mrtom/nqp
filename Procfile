@@ -1,1 +1,1 @@
-web: node dbcreate.js
+web: node server.js
