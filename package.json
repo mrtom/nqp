@@ -12,7 +12,8 @@
   "dependencies": {
     "express": "2.5.x",
     "node-uuid": "*",
-    "crypto": "*"
+    "crypto": "*",
+    "sqlite3":    "*"
   },
   "engines": {
     "node": "0.8.x",
