@@ -1,0 +1,16 @@
+{
+  "name": "nodeFBBootstrapTemplateh",
+  "description": "Template for using Backbone.js, require.js, and the Facebook SDK with Node",
+  "version": "0.1.0",
+  "maintainers": [
+    {
+      "name": "Tom Elliott",
+      "email": "tomelliott@fb.com",
+      "web": "https://www.facebook.com/temelliott"
+    }
+  ],
+  "dependencies": {
+    "express": "<3.0",
+    "crypto": "*"
+  }
+}

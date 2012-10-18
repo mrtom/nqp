@@ -1,0 +1,32 @@
+<!--[if lt IE 7]>
+  <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+<![endif]-->
+
+<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <span class="brand">Awesome Brand</span>
+        <p class="navbar-text pull-right">
+          <span class="user-details">
+            <span class="not-logged-in">Not logged in</span>
+            <span class="logged-in hide">
+              <img src="<%= pic %>" />
+              <%= name %>
+            </span>
+          </span>
+        </p>
+    </div>
+  </div>
+</div>
+
+<div class="modal hide fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="loginModalLabel">You must login to start...</h3>
+  </div>
+  <div class="modal-body">
+    <div class="fb-login-button" data-show-faces="true" data-width="400" data-max-rows="1" data-scope=""></div>
+  </div>
+  <div class="modal-footer">
+  </div>
+</div>

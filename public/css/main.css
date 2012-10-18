@@ -1,0 +1,29 @@
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+.navbar .user-details {
+  margin-top: 10px; /* Can probably fix this better some other way? */
+}
+
+.navbar .user-details .logged-in img {
+  width: 23px;
+}
+
+.center {
+  text-align: center;
+}
+
+.qr {
+  width: 400px;
+}
+
+
+
+
+
+
+
+
+
+
