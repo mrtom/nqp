@@ -10,7 +10,11 @@
     }
   ],
   "dependencies": {
-    "express": "<3.0",
+    "express": "2.5.x",
     "crypto": "*"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
   }
 }
