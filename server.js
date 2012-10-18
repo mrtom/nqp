@@ -84,6 +84,7 @@ app.configure(function() {
 });
 
 // sigh no ipv6
-var server = app.listen(null, '127.0.0.1', null, function() {
+var port = process.env.PORT || 5000;
+var server = app.listen(port, '127.0.0.1', null, function() {
   console.log("Started server on port http://%s:%d", server.address().address, server.address().port);
 });
