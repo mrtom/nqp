@@ -84,7 +84,17 @@ app.configure(function() {
 });
 
 // sigh no ipv6
-var port = process.env.PORT || 5000;
-var server = app.listen(port, '127.0.0.1', null, function() {
+// Do some shuffling for heroku vs localhost
+// TODO: Make this less janky
+var port, domain;
+var port = process.env.PORT || 8000;
+if (process.env.PORT) {
+  // Heroku!
+  domain = "0.0.0.0";
+} else {
+  domain = "127.0.0.1"
+}
+
+var server = app.listen(port, domain, null, function() {
   console.log("Started server on port http://%s:%d", server.address().address, server.address().port);
 });
