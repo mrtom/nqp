@@ -1414,9 +1414,9 @@ var qrcode = function() {
 			out.writeByte(0x00);
 
 			// white
-			out.writeByte(0xff);
-			out.writeByte(0xff);
-			out.writeByte(0xff);
+			out.writeByte(0xf5);
+			out.writeByte(0xf5);
+			out.writeByte(0xf5);
 
 			//---------------------------------
 			// Image Descriptor

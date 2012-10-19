@@ -84,7 +84,7 @@ function($, _, Backbone, Bootstrap, qr, mainTemplate) {
       qr.addData(code);
       qr.make();
 
-      var node = qr.createImgTag(2);
+      var node = qr.createImgTag(10);
       this.model.set('code_img', $(node).attr('src'));
     },
 
