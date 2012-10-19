@@ -9,9 +9,9 @@ NQP is a simple demonstration of how to take the Facebook Platform offline. User
 ## Instalation
 
  * Install node and npm (http://www.nodejs.org)
- * Clone the repo: `git clone git@github.com:mrtom/nqp.giti`
+ * Clone the repo: `git clone git@github.com:mrtom/nqp.git`
  * Install dependencies: `cd nqp && npm installi`
- * Create the Database: `node dbcreate.jsi`
+ * Create the Database: `node dbcreate.js`
  * Create a config.js: `cp config.js.example config.js`
  * Update your Facebook App ID and App Secret (Head over to https://developers.facebook.com/apps if you don't have a Facebook App. Remember to add 'localhost' as a App Domain and either your Website or Mobile Web URL)
  * Replace other instances of the App ID in the code: `grep -R 426695997394974 *` // TODO: Make this less shit
