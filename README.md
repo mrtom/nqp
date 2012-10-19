@@ -3,6 +3,9 @@ NQP
 
 NQP is a simple demonstration of how to take the Facebook Platform offline. Users browse to the site, login with Facebook and the system generates a QR code unique to the user. This code can then be scanned at a later date and used to allow serverside integration with the Facbook Platform without the user having to log in to a remote kiosk.
 
+== Demo ==
+ * http://telliott.net:18274/
+
 == Instalation ==
 
  * Install node and npm (http://www.nodejs.org)

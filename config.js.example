@@ -3,17 +3,18 @@ var config = {}
 var apps = {
   'prod': {
     app_id: '',
-    secret: ''
+    secret: '',
+    host:   '',
+    port:   ''
   },
   'dev': {
     app_id: 'xxxxxxxxx',
-    secret: 'xxxxxxxxx'
+    secret: 'xxxxxxxxx',
+    host:   "xxxxxxxxx',
+    port:   "xxxxxxxxx'
   }
 }
 
 config.app = apps['dev'];
-config.FACEBOOK_HOST = 'graph.facebook.com';
-config.DEV_MODE = true;
-config.ON_A_PLANE = true;
 
 module.exports = config;

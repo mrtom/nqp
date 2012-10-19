@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- var SECRET = "fcda08e9fa30627468a998425ec6a988";
+var SECRET = "fcda08e9fa30627468a998425ec6a988";
 
 var express = require('express'),
     uuid    = require('node-uuid'),
@@ -26,6 +26,11 @@ var express = require('express'),
 
 var app = express.createServer();
 var db  = new sqlite3.Database('./db/master.sqlite');
+
+var FACEBOOK_SECRET = (config && config.app ? config.app.secret : process.env.FACEBOOK_SECRET);
+if (!FACEBOOK_SECRET) {
+  throw "Could not find Facebook details"
+}
 
 app.configure(function() {
   app.use(express.bodyParser());
@@ -49,7 +54,7 @@ app.configure(function() {
           // TODO: Handle error, log etc
         }
 
-        var hashedSig = crypto.createHmac('SHA256', config.app.secret).update(payload).digest('base64').replace(/\+/g,'-').replace(/\//g,'_').replace('=','');
+        var hashedSig = crypto.createHmac('SHA256', FACEBOOK_SECRET).update(payload).digest('base64').replace(/\+/g,'-').replace(/\//g,'_').replace('=','');
 
         var decodedSig = new Buffer(encodedSig, 'base64').toString('ascii');
         var decodedHashedSig = new Buffer(hashedSig, 'base64').toString('ascii');
@@ -75,7 +80,7 @@ app.configure(function() {
 
           var params = {
             client_id:     config.app.app_id,
-            client_secret: config.app.secret,
+            client_secret: FACEBOOK_SECRET,
             redirect_uri:  '',
             code:          data.code
           };
@@ -203,14 +208,14 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
 
 // sigh no ipv6
 // Do some shuffling for heroku vs localhost
-// TODO: Make this less janky
 var port, domain;
-var port = process.env.PORT || 8000;
+var port = process.env.PORT;
 if (process.env.PORT) {
   // Heroku!
   domain = "0.0.0.0";
 } else {
-  domain = "127.0.0.1"
+  domain = config.app.host;
+  port   = config.app.port;
 }
 
 var server = app.listen(port, domain, null, function() {
