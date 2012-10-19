@@ -28,6 +28,11 @@ function($, _, Backbone, Bootstrap, User, mainView, navView, chromeTemplate) {
       
       this.user = new User;
       this.render();
+
+      setTimeout(function(){
+        // Hide the address bar on iPhones
+        window.scrollTo(0, 1);
+      }, 0);
     },
 
     render: function() {

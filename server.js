@@ -119,7 +119,7 @@ app.configure(function() {
 
     var hash = req.query["code"];
     if (hash) {
-      db.all("SELECT access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash", {
+      db.all("SELECT fb_id AS fb_id, access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash", {
         $hash: hash
       }, function(err, rows) {
         if (err || rows.length > 1) {
@@ -131,6 +131,15 @@ app.configure(function() {
               'success': true
             }));
           } else {
+            // Sanity check
+            var fb_id = rows[0].fb_id;
+            var encoded_fb_id = crypto.createHmac('SHA256', SECRET).update(fb_id).digest('base64');
+
+            if (encoded_fb_id !== hash) {
+              res.sendInternalServerError();
+              return;
+            }
+
             res.send(JSON.stringify({
               'success': true,
               'access_token': rows[0].token,
