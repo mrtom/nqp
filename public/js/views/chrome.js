@@ -6,18 +6,20 @@ define([
   "bootstrap",
 
   // Models
+  "models/nav",
   "models/user",
 
   // Views
-  "views/main",
+  "views/base",
   "views/nav",
 
   // Templates
   "text!template/chromeTemplate.html"
 ],
 
-function($, _, Backbone, Bootstrap, User, mainView, navView, chromeTemplate) {
-  var ChromeView = Backbone.View.extend({
+// Loads a main view within the app Chrome, i.e. with the NavBar
+function($, _, Backbone, Bootstrap, Nav, User, BaseView, navView, chromeTemplate) {
+  var ChromeView = BaseView.extend({
 
     chromeTemplate: _.template(chromeTemplate),
 
@@ -26,8 +28,9 @@ function($, _, Backbone, Bootstrap, User, mainView, navView, chromeTemplate) {
       // Turn on bootstrap data-api
       $('body').on('.data-api');
       
-      this.user = new User;
       this.render();
+
+      $('#bootstrap').append(this.$el);
 
       setTimeout(function(){
         // Hide the address bar on iPhones
@@ -40,11 +43,13 @@ function($, _, Backbone, Bootstrap, User, mainView, navView, chromeTemplate) {
 
       this.navView = new navView({ 
         el: this.$("#nav"),
-        model: this.user
+        model: new Nav({ user: this.options.user }),
+        router: this.options.router
       });
-      this.mainView = new mainView({ 
+      this.mainView = new this.options.mainViewType({ 
         el: this.$("#main"),
-        model: this.user
+        model: this.options.mainModel,
+        router: this.options.router
       });
     }
   });

@@ -5,75 +5,66 @@ define([
   "backbone",
   "bootstrap",
   "qr",
+
+  // Views
+  "views/base",
   
   // Templates
   "text!template/mainTemplate.html"
 ],
 
-function($, _, Backbone, Bootstrap, qr, mainTemplate) {
+function($, _, Backbone, Bootstrap, qr, BaseView, mainTemplate) {
 
-  var MainView = Backbone.View.extend({
+  var MainView = BaseView.extend({
     mainTemplate: _.template(mainTemplate),
 
     initialize: function() {
       require( ['FB!'], _.bind(function() {
-          this.model.on('change:code', this.drawQrCode, this);
-          this.model.on('change:code_img', this.render, this);
+        this.model.on('change:code', this.drawQrCode, this);
+        this.model.on('change:code_img', this.render, this);
+        this.model.on('change:signedRequest', this.getCode, this);
 
-          var view = this;
+        var view = this;
 
-          FB.Event.subscribe('auth.statusChange', _.bind(function(response) {
-            switch(response.status) {
-              case 'unknown':
-                // Fall through
-              case 'not_authorized':
-                console.debug('Must login!');
-                window.FB.XFBML.parse($('#loginModal')[0]);
-                $("#loginModal").modal();
-                break;
-              case 'connected': 
-                $('#loginModal').modal('hide');
+        FB.Event.subscribe('auth.authResponseChange', _.bind(function(response) {
+          switch(response.status) {
+            case 'unknown':
+              // Fall through
+            case 'not_authorized':
+              break;
+            case 'connected': 
+              $('#loginModal').modal('hide');
 
-                var uid = response.authResponse.userID;
-                var signedRequest = response.authResponse.signedRequest;
-                console.debug('woop! Welcome user #'+uid);
-
-                FB.api('me?fields=id,name,picture.type(square)', _.bind(function(r) {
-                  this.model.set({
-                    'uid': uid,
-                    'name': r.name,
-                    'pic': r.picture.data.url,
-                    'loaded': true,
-                    'signedRequest': signedRequest
-                  });
-
-                  $.ajax({
-                    url: "/api/gen",
-                    context: this,
-                    type: "POST",
-                    data: 'signed_request='+signedRequest,
-                  }).done(function(r) {
-                    if (r.code) {
-                      this.model.set('code', r.code);
-                    } else {
-                      // TODO: Error!
-                    }
-                  });
-                  }, this));
-                break;
-                default:
-                  console.log("Unexpected responsen from Facebook auth: `" + response.status + "` not recognised!")
-            }
-          }, this));
-
+              this.model.set('signedRequest', response.authResponse.signedRequest);
+              
+              break;
+              default:
+                console.log("Unexpected response from Facebook auth: `" + response.status + "` not recognised!")
+          }
         }, this));
-        this.render();
+      }, this));
+      this.render();
     },
 
     render: function() {
       $(this.el).html(this.mainTemplate(
         this.model.toJSON()
       ));
+    },
+
+    getCode: function() {
+      $.ajax({
+        url: "/api/gen",
+        context: this,
+        type: "POST",
+        data: 'signed_request='+this.model.get('signedRequest'),
+      }).done(function(r) {
+        if (r.code) {
+          this.model.set('code', r.code);
+        } else {
+          // TODO: Error!
+        }
+      });
     },
 
     drawQrCode: function() {

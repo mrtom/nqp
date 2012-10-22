@@ -5,14 +5,18 @@ define([
   "backbone",
 
   // Models
+  "models/account",
   "models/fourohfour",
+  "models/user",
 
   // Views
+  "views/account",
   "views/chrome",
-  "views/fourohfour"
+  "views/fourohfour",
+  "views/main"
 ], 
 
-function($, _, Backbone, FourOhFour, ChromeView, FourOhFourView) {
+function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, FourOhFourView, MainView) {
   // App Router
   // ---------- 
                 
@@ -20,31 +24,51 @@ function($, _, Backbone, FourOhFour, ChromeView, FourOhFourView) {
 
     routes: {
       ""            : "showChrome",
+      "account"     : "showAccount",
       "*other"      : "showFourOhFour"
     },
 
-    showChrome: function() {
-      console.log('Showing Chrome');
-      this.destroyPrimary(this.fourohfour, this.fourohfourView);
+    initialize: function() {
+      this.user = new User;
+    },
+
+    // Show the main page
+    showChrome: function(mainModel, mainViewType) {
+      console.debug('Showing Chrome');
+      this.destroyPrimary(this.chrome, this.chromeView);
+
+      if (!mainViewType) {
+        console.debug("No view specified. Showing mainView");
+        mainViewType = MainView;
+        mainModel = this.user;
+      }
 
       this.chromeView = new ChromeView({
-        el: $('#bootstrap'),
-        router: this
+        router: this,
+        mainModel: mainModel,
+        mainViewType: mainViewType,
+        user: this.user
       });
+    },
+
+    // show the account/profile page
+    showAccount: function() {
+      console.debug('Showing account')
+      return this.showChrome(new Account({
+        user: this.user
+      }), AccountView);
     },
 
     showFourOhFour: function(route) {
       console.debug('Showing 404');
-      this.destroyPrimary(this.main, this.mainView);
+      this.destroyPrimary(this.chrome, this.chromeView);
 
-      this.fourohfour = new FourOhFour({
-        route: route
-      });
-      this.fourohfourView = new FourOhFourView({
-        el: $('#bootstrap'),
-        router: this,
-        model: this.fourohfour
-      });
+      this.showChrome(
+        new FourOhFour({
+          route: route
+        }),
+        FourOhFourView
+      );
     },
 
     destroyPrimary: function(/* Backbone.Model */ model, /* Backbone.View */ view) {

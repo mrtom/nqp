@@ -16,7 +16,8 @@ require.config({
     backbone: "./vendor/backbone-min",
     bootstrap: "./vendor/bootstrap.min",
     qr: "./vendor/qrcode",
-    text: "./vendor/require/text"
+    text: "./vendor/require/text",
+    amplify_store: "./vendor/amplify.store.min.js"
   },
 
   shim: {
@@ -36,11 +37,16 @@ require.config({
 
     bootstrap: {
       deps: ["jquery"],
-      exporst: "Bootstrap"
+      exports: "Bootstrap"
     },
 
     qr: {
       exports: "qr"
+    },
+
+    amplify_store: {
+      deps: ["jquery"],
+      exports: "amplify_store"
     }
   }
 

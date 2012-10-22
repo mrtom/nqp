@@ -3,12 +3,20 @@ define([
   "jquery",
   "underscore",
   "backbone",
+
+  // Models
+  "models/user",
+
+  // Views
+  "views/base",
+
+  // Templates
   "text!template/fourohfourTemplate.html"
 ],
 
-function($, _, Backbone, fourohfourTemplate) {
+function($, _, Backbone, User, BaseView, fourohfourTemplate) {
 
-  var FourOhFourView = Backbone.View.extend({
+  var FourOhFourView = BaseView.extend({
 
     fourohfourTemplate: _.template(fourohfourTemplate),
 
@@ -20,10 +28,6 @@ function($, _, Backbone, fourohfourTemplate) {
 
     render: function() {
       $(this.el).html(this.fourohfourTemplate(this.model.toJSON()));
-    },
-
-    destroy: function() {
-      this.remove();
     }
 
   })
