@@ -90,7 +90,7 @@ app.configure(function() {
           request.on('fail', function(data) {
             var result = JSON.parse(data);
             console.log('Invalid code: ' + result.error.message);
-            sendInternalServerError();
+            sendInternalServerError(res);
           });
 
           request.on('success', function(r) {
@@ -109,7 +109,7 @@ app.configure(function() {
                   'code': encodedCode
                 }));
               } else {
-                sendInternalServerError();
+                sendInternalServerError(res);
               }
               return;
             });
@@ -128,7 +128,7 @@ app.configure(function() {
         $hash: hash
       }, function(err, rows) {
         if (err || rows.length > 1) {
-          sendInternalServerError();
+          sendInternalServerError(res);
         } else {
           res.header('Content-Type', 'text/json');
           if (rows.length == 0) {
@@ -141,7 +141,7 @@ app.configure(function() {
             var encoded_fb_id = crypto.createHmac('SHA256', SECRET).update(fb_id).digest('base64');
 
             if (encoded_fb_id !== hash) {
-              res.sendInternalServerError();
+              res.sendInternalServerError(res);
               return;
             }
 
@@ -154,7 +154,7 @@ app.configure(function() {
         }
       });
     } else {
-      sendInternalServerError();
+      sendInternalServerError(res);
     }
   });
 
@@ -165,7 +165,7 @@ app.configure(function() {
   });
 });
 
-function sendInternalServerError() {
+function sendInternalServerError(res) {
   res.header('Content-Type', 'text/json');
   res.status(500);
   res.write(JSON.stringify({'success': false}));
