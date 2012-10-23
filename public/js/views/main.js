@@ -19,6 +19,12 @@ function($, _, Backbone, Bootstrap, qr, BaseView, mainTemplate) {
     mainTemplate: _.template(mainTemplate),
 
     initialize: function() {
+      var localStorageUser = this.options.router.getSavedUser();
+      if (localStorageUser && localStorageUser.code) {
+        // Draw QR code from native storage now
+        this.drawQrCode(this.model, localStorageUser.code);
+      }
+
       require( ['FB!'], _.bind(function() {
         this.model.on('change:code', this.drawQrCode, this);
         this.model.on('change:code_img', this.render, this);
@@ -61,14 +67,16 @@ function($, _, Backbone, Bootstrap, qr, BaseView, mainTemplate) {
       }).done(function(r) {
         if (r.code) {
           this.model.set('code', r.code);
+          this.options.router.saveUser();
+
         } else {
           // TODO: Error!
         }
       });
     },
 
-    drawQrCode: function() {
-      var code = this.model.get('code');
+    drawQrCode: function(model, code_to_draw) {
+      var code = code_to_draw || this.model.get('code');
       if (!code) return;
 
       var qr = qrcode(4, 'M');

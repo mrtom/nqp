@@ -51,6 +51,11 @@ function($, _, Backbone, Bootstrap, Nav, User, BaseView, navView, chromeTemplate
         model: this.options.mainModel,
         router: this.options.router
       });
+    },
+
+    destroy: function() {
+      this.navView.destroy();
+      this.mainView.destroy();
     }
   });
 

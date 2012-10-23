@@ -22,7 +22,7 @@ function($, _, Backbone, User, BaseView, navView, accountTemplate) {
     accountTemplate: _.template(accountTemplate),
 
     className: "account",
-
+   
     events: {
       "click .btn-logout" : "logout",
       "click .btn-unlink" : "unlink"
@@ -44,6 +44,7 @@ function($, _, Backbone, User, BaseView, navView, accountTemplate) {
     logout: function() {
       require( ['FB!'], _.bind(function() {
         FB.logout();
+        this.options.router.removeSavedUser();
         this.options.router.navigate('', { trigger:true });
       }, this));
     },
@@ -52,9 +53,9 @@ function($, _, Backbone, User, BaseView, navView, accountTemplate) {
       require( ['FB!'], _.bind(function() {
         FB.api('me/permissions', 'delete', _.bind(function(response) {
           if (!response || response.error) {
-            console.log(response);
             alert('Error unlinking application');
           } else {
+            this.options.router.removeSavedUser();
             this.options.router.navigate('', { trigger:true });
           }
         }, this));

@@ -22,6 +22,8 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
                 
   var Workspace = Backbone.Router.extend({
 
+   localStorageKey: "nqp-user",
+
     routes: {
       ""            : "showChrome",
       "account"     : "showAccount",
@@ -77,9 +79,22 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
         view = null;
       }
       if (model) {
-        model.clear({slient: true});
+        model.clear({silent: true});
         model = null;
       }
+    },
+
+    saveUser: function() {
+      // Store in localStorage
+      localStorage.setItem(this.localStorageKey, JSON.stringify(this.user));
+    },
+
+    getSavedUser: function() {
+      return localStorage.getItem(this.localStorageKey);
+    },
+
+    removeSavedUser: function() {
+      localStorage.removeItem(this.localStorageKey);
     }
 
   });
