@@ -90,7 +90,7 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
     },
 
     getSavedUser: function() {
-      return localStorage.getItem(this.localStorageKey);
+      return JSON.parse(localStorage.getItem(this.localStorageKey));
     },
 
     removeSavedUser: function() {
