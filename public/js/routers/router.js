@@ -86,15 +86,25 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
 
     saveUser: function() {
       // Store in localStorage
-      localStorage.setItem(this.localStorageKey, JSON.stringify(this.user));
+      if (localStorage) {
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.user));
+        return true;
+      }
+      return false;
     },
 
     getSavedUser: function() {
-      return JSON.parse(localStorage.getItem(this.localStorageKey));
+      if (localStorage) {
+        return JSON.parse(localStorage.getItem(this.localStorageKey));
+      }
+      return null;
     },
 
     removeSavedUser: function() {
-      localStorage.removeItem(this.localStorageKey);
+      if (localStorage) {
+        localStorage.removeItem(this.localStorageKey);
+      }
+      return false;
     }
 
   });
