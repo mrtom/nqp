@@ -51,9 +51,6 @@ function($, _, Backbone, Bootstrap, BaseView, navTemplate) {
                   'loaded': true,
                   'signedRequest': signedRequest
                 });
-
-                this.model.get('user').set('signedRequest', response.authResponse.signedRequest);
-
               }, this));
               break;
               default:
@@ -61,7 +58,7 @@ function($, _, Backbone, Bootstrap, BaseView, navTemplate) {
           }
         }, this));
 
-        if (!this.model.get('signed_request')) {
+        if (!this.model.get('signedRequest')) {
           // Force FB auth.authResponseChange event
           FB.getLoginStatus();
         }

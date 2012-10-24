@@ -209,7 +209,7 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
 // sigh no ipv6
 // Do some shuffling for heroku vs localhost
 var port, domain;
-var port = process.env.PORT;
+port = process.env.PORT;
 if (process.env.PORT) {
   // Heroku!
   domain = "0.0.0.0";
