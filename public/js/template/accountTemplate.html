@@ -1,9 +1,11 @@
-<h1><%= user.attributes.name %></h1>
-<div>
-  <span class="pull-left">
-    <button class="btn btn-inverse btn-unlink" <%= disabled%>>Unlink with Facebook</button>
-  </span>
-  <span class="pull-right">
-    <button class="btn btn-inverse btn-logout" <%= disabled %>>Logout</button>
-  </span>
+<div class="container">
+  <h1><%= user.attributes.name %></h1>
+  <div class="row">
+    <div class="span3 offset 2">
+      <button class="btn btn-inverse btn-unlink" <%= disabled%>>Unlink with Facebook</button>
+    </div>
+    <div class="span3 offset 2">
+      <button class="btn btn-inverse btn-logout" <%= disabled %>>Logout</button>
+    </div>
+  </div>
 </div>
