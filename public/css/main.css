@@ -22,6 +22,14 @@
   border-radius: 4px;
 }
 
+/* Booth */
+#qr-canvas {
+  display: none;
+}
+
+#QRScanner, #QRScanner video {
+  width: 330px;
+}
 
 
 

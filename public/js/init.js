@@ -10,13 +10,15 @@ require.config({
     plugins: "./plugins",
 
     // Libraries.
-    FB: "./vendor/fb",
-    jquery: "./vendor/jquery-1.8.1.min",
+    FB:         "./vendor/fb",
+    jquery:     "./vendor/jquery-1.8.1.min",
     underscore: "./vendor/underscore-min",
-    backbone: "./vendor/backbone-min",
-    bootstrap: "./vendor/bootstrap.min",
-    qr: "./vendor/qrcode",
-    text: "./vendor/require/text"
+    backbone:   "./vendor/backbone-min",
+    bootstrap:  "./vendor/bootstrap.min",
+    qr:         "./vendor/qrcode",
+    text:       "./vendor/require/text",
+    swfobject:  "./vendor/swfobject",
+    llqrcode:   "./vendor/qr_reader/llqrcode"
   },
 
   shim: {
@@ -41,6 +43,14 @@ require.config({
 
     qr: {
       exports: "qr"
+    },
+
+    swfobject: {
+      exports: "swfobject"
+    },
+
+    llqrcode: {
+      exports: "llqrcode"
     }
   }
 

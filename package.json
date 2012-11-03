@@ -1,6 +1,6 @@
 {
-  "name": "nodeFBBootstrapTemplateh",
-  "description": "Template for using Backbone.js, require.js, and the Facebook SDK with Node",
+  "name": "NQP",
+  "description": "NotQuitePresence - A demo of using Facebook 'in the real world'",
   "version": "0.1.0",
   "maintainers": [
     {

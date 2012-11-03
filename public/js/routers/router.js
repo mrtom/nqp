@@ -6,17 +6,19 @@ define([
 
   // Models
   "models/account",
+  "models/booth",
   "models/fourohfour",
   "models/user",
 
   // Views
   "views/account",
+  "views/booth",
   "views/chrome",
   "views/fourohfour",
   "views/main"
 ], 
 
-function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, FourOhFourView, MainView) {
+function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothView, ChromeView, FourOhFourView, MainView) {
   // App Router
   // ---------- 
                 
@@ -27,6 +29,7 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
     routes: {
       ""            : "showChrome",
       "account"     : "showAccount",
+      "booth"   : "showBooth",
       "*other"      : "showFourOhFour"
     },
 
@@ -55,10 +58,22 @@ function($, _, Backbone, Account, FourOhFour, User, AccountView, ChromeView, Fou
 
     // show the account/profile page
     showAccount: function() {
-      console.debug('Showing account')
+      console.debug('Showing account');
       return this.showChrome(new Account({
         user: this.user
       }), AccountView);
+    },
+
+    // show the booth
+    showBooth: function() {
+      console.debug('Showing booth');
+      this.destroyPrimary(this.chrome, this.chromeView);
+
+      this.boothModel = new Booth();
+      this.boothView = new BoothView({
+        router : this,
+        model  : this.boothModel
+      });
     },
 
     showFourOhFour: function(route) {

@@ -124,10 +124,17 @@ app.configure(function() {
 
     var hash = req.query["code"];
     if (hash) {
-      db.all("SELECT fb_id AS fb_id, access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash", {
+      db.all("SELECT fbid AS fb_id, access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash", {
         $hash: hash
       }, function(err, rows) {
         if (err || rows.length > 1) {
+          console.log("Error retrieving access token.");
+          if (rows) {
+            console.log("DB Call returned " + rows.length + " rows");
+          }
+          if (err) {
+            console.log(err);
+          }
           sendInternalServerError(res);
         } else {
           res.header('Content-Type', 'text/json');
