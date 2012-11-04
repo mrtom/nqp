@@ -10,11 +10,12 @@
     }
   ],
   "dependencies": {
-    "express":   "2.5.x",
-    "node-uuid": "*",
-    "crypto":    "*",
-    "sqlite3":   "*",
-    "restler":   "2.0.0"
+    "express"   :   "2.5.x",
+    "node-uuid" :   "*",
+    "crypto"    :   "*",
+    "sqlite3"   :   "*",
+    "restler"   :   "2.0.0",
+    "async"     :   "*"
   },
   "engines": {
     "node": "0.8.x",

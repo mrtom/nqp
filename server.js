@@ -22,7 +22,8 @@ var express = require('express'),
     crypto  = require('crypto'),
     restler = require('restler'),
     qs      = require('querystring'),
-    sqlite3 = require('sqlite3');
+    sqlite3 = require('sqlite3'),
+    async   = require('async');
 
 var app = express.createServer();
 var db  = new sqlite3.Database('./db/master.sqlite');
@@ -40,83 +41,20 @@ app.configure(function() {
   
   app.post('/api/gen', function(req, res) {
     console.log("Received new API call to /api/gen at " + new Date());
-
-    // Decode signed Request
     var signedRequest = req.param('signed_request');
-    if (signedRequest) {
-      var index = signedRequest.indexOf(".");
-      if (index > 0) {
-        var encodedSig = signedRequest.substr(0, index);
-        var payload = signedRequest.substr(index+1);
 
-        var data = JSON.parse(new Buffer(payload, 'base64').toString('ascii'));
-        if (data.algorithm.toUpperCase() !== 'HMAC-SHA256') {
-          // TODO: Handle error, log etc
-        }
-
-        var hashedSig = crypto.createHmac('SHA256', FACEBOOK_SECRET).update(payload).digest('base64').replace(/\+/g,'-').replace(/\//g,'_').replace('=','');
-
-        var decodedSig = new Buffer(encodedSig, 'base64').toString('ascii');
-        var decodedHashedSig = new Buffer(hashedSig, 'base64').toString('ascii');
-        if (!decodedSig === decodedHashedSig) {
-          // TODO: Handler error, log etc
-          console.log("*** WARNING!: Couldn't verify signed request! ***")
-        }
-
-        // Get access token
-        var access_token;
-        var expires;
-        var userId = data.user_id;
-
-        if (data.oauth_token) {
-          access_token = data.oauth_token;
-          expires = data.expires;
-        } else {
-          if (!data.code) {
-            // throw("no oauth token and no code to get one");
-            // TODO: Handle error case
-            console.log("*** WARNING!: No ouath token and no code to get one. :( ***");
-          }
-
-          var params = {
-            client_id:     config.app.app_id,
-            client_secret: FACEBOOK_SECRET,
-            redirect_uri:  '',
-            code:          data.code
-          };
-
-          var request = restler.get('https://graph.facebook.com/oauth/access_token', { query:params });
-          
-          request.on('fail', function(data) {
-            var result = JSON.parse(data);
-            console.log('Invalid code: ' + result.error.message);
-            sendInternalServerError(res);
-          });
-
-          request.on('success', function(r) {
-            access_token = qs.parse(r).access_token;
-            expires = qs.parse(r).expires;
-
-            // Extract access token and generate our code
-            var encodedCode = crypto.createHmac('SHA256', SECRET).update(data.user_id).digest('base64');
-
-            // Save everything to our database
-            createOrUpdateUserRecord(userId, access_token, expires, encodedCode, function(db_success) {
-              if (db_success) {
-                res.header('Content-Type', 'text/json');
-                res.send(JSON.stringify({
-                  'success': true,
-                  'code': encodedCode
-                }));
-              } else {
-                sendInternalServerError(res);
-              }
-              return;
-            });
-          });
-        }
-      }
-    }
+    async.waterfall([
+      function(cb){
+        cb(null, signedRequest);
+      },
+      decodeSignedRequest,
+      extendAccessToken,
+      generateHashCode,
+      createOrUpdateUserRecord
+    ],
+    function(err, encodedCode) {
+      sendAccessToken(err, encodedCode, res);
+    });
   });
 
   app.get('/api/get_access_token', function(req, res) {
@@ -172,10 +110,98 @@ app.configure(function() {
   });
 });
 
-function sendInternalServerError(res) {
-  res.header('Content-Type', 'text/json');
-  res.status(500);
-  res.write(JSON.stringify({'success': false}));
+function decodeSignedRequest(signedRequest, callback) {
+    // Decode signed Request
+    if (signedRequest) {
+      var index = signedRequest.indexOf(".");
+      if (index > 0) {
+        var encodedSig = signedRequest.substr(0, index);
+        var payload = signedRequest.substr(index+1);
+
+        var data = JSON.parse(new Buffer(payload, 'base64').toString('ascii'));
+        if (data.algorithm.toUpperCase() !== 'HMAC-SHA256') {
+          // TODO: Handle error, log etc
+        }
+
+        var hashedSig = crypto.createHmac('SHA256', FACEBOOK_SECRET).update(payload).digest('base64').replace(/\+/g,'-').replace(/\//g,'_').replace('=','');
+
+        var decodedSig = new Buffer(encodedSig, 'base64').toString('ascii');
+        var decodedHashedSig = new Buffer(hashedSig, 'base64').toString('ascii');
+        if (!decodedSig === decodedHashedSig) {
+          // TODO: Handler error, log etc
+          console.log("*** WARNING!: Couldn't verify signed request! ***")
+        }
+
+        // Get access token
+        var access_token;
+        var expires;
+        var userId = data.user_id;
+
+        if (data.oauth_token) {
+          access_token = data.oauth_token;
+          expires = data.expires;
+
+          callback(null, data.user_id, access_token, expires);
+        } else {
+          if (!data.code) {
+            console.log("*** WARNING!: No ouath token and no code to get one. :( ***");
+          }
+
+          var params = {
+            client_id:     config.app.app_id,
+            client_secret: FACEBOOK_SECRET,
+            redirect_uri:  '',
+            code:          data.code
+          };
+
+          var request = restler.get('https://graph.facebook.com/oauth/access_token', { query:params });
+          
+          request.on('fail', function(data) {
+            var result = JSON.parse(data);
+            callback('Invalid code: ' + result.error.message);
+          });
+
+          request.on('success', function(r) {
+            access_token = qs.parse(r).access_token;
+            expires = qs.parse(r).expires;
+
+            callback(null, data.user_id, access_token, expires);
+          });
+        }
+      }
+    } else {
+      callback("Could not find signed request in HTTP request", null);
+    }
+};
+
+function extendAccessToken(fbId, accessToken, expires, callback) {
+  var params = {
+    client_id         : config.app.app_id,
+    client_secret     : FACEBOOK_SECRET,
+    grant_type        : 'fb_exchange_token',
+    fb_exchange_token : accessToken
+  };
+  var request = restler.get('https://graph.facebook.com/oauth/access_token', { query:params });
+
+  request.on('fail', function(data) {
+    var result = JSON.parse(data);
+    console.log("Could not extend access token. Continuing with original");
+    callback(null, fbId, accessToken, expires);
+  });
+
+  request.on('success', function(r) {
+    accessToken = qs.parse(r).access_token;
+    expires = qs.parse(r).expires;
+
+    callback(null, fbId, accessToken, expires);
+  });
+};
+
+function generateHashCode(fbId, accessToken, expires, callback) {
+  // Extract access token and generate our code
+  var encodedCode = crypto.createHmac('SHA256', SECRET).update(fbId).digest('base64');
+
+  callback(null, fbId, accessToken, expires, encodedCode);
 };
 
 function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, hash, cb) {
@@ -194,8 +220,8 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
         $access_token_expires: access_token_expires,
         $hash: hash
       }, function(err) {
-        if (err) cb(false);
-        else cb(true);
+        if (err) cb("Error saving to database");
+        else cb(null, hash);
       });
     } else {
       // Update row
@@ -206,11 +232,30 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
         $access_token_expires: access_token_expires,
         $hash: hash
       }, function(err) {
-        if (err) cb(false);
-        else cb(true);
+        if (err) cb("Error saving to database");
+        else cb(null, hash);
       })
     }
   });
+};
+
+function sendAccessToken(err, encodedCode, res) {
+  if (err) {
+    console.log(err);
+    sendInternalServerError(res);
+  } else {
+    res.header('Content-Type', 'text/json');
+    res.send(JSON.stringify({
+      'success': true,
+      'code': encodedCode
+    }));
+  }
+};
+
+function sendInternalServerError(res) {
+  res.header('Content-Type', 'text/json');
+  res.status(500);
+  res.write(JSON.stringify({'success': false}));
 };
 
 // sigh no ipv6
