@@ -4,9 +4,11 @@ NQP
 NQP is a simple demonstration of how to take the Facebook Platform offline. Users browse to the site, login with Facebook and the system generates a QR code unique to the user. This code can then be scanned at a later date and used to allow serverside integration with the Facbook Platform without the user having to log in to a remote kiosk.
 
 ## Demo
- * Load the 'booth' - http://telliott.net:18274/booth. Requires a modern browser with user media support and an attached webcbam. Tested on Chrome 22. Use that. Allow access to the camera. ![User View](https://github.com/mrtom/nqp/raw/master/docs/images/UserView.png  "Optional title")
+ * Load the 'booth' - http://telliott.net:18274/booth. Requires a modern browser with user media support and an attached webcbam. Tested on Chrome 22. Use that. Allow access to the camera. 
  * Load the user code - http://telliott.net:18274/. Use your smartphone ideally.
  * Scan your code from your smartphone with the webcam. The 'booth' should show a personalised view.
+ * ![User View](https://github.com/mrtom/nqp/raw/master/docs/images/UserView.png  "User view")
+ * ![Allow Camera](https://github.com/mrtom/nqp/raw/master/docs/images/AllowCamera.png  "Allow Camera") ![Scan Code](https://github.com/mrtom/nqp/raw/master/docs/images/ScanCode.png "Scan Code") ![Personalised Experience](https://github.com/mrtom/nqp/raw/master/docs/images/BoothPersonalisesExperience.png "Personalised Experience")
 
 ## Instalation
 
