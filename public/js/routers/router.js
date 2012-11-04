@@ -127,10 +127,9 @@ function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothVie
   addCallback: function(/* function */ cb) {
     var functionName = "global_callback_"+this.callbackIndex;
     window[functionName] = function(response) {
-      console.log("Calling global callback");
       cb(response);
       window[functionName] = null;
-    }
+    };
 
     this.callbackIndex++;
     return functionName;

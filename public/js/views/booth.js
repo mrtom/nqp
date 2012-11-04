@@ -86,7 +86,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
     },
 
     initQR: function() {
-      console.debug('Initing QR');
       var n=navigator;
       this.video=$("#video")[0];
 
@@ -98,7 +97,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
       } else if(n.mozGetUserMedia) {
         n.mozGetUserMedia({video: true, audio: false}, _.bind(this.gotUserMedia, this), _.bind(this.errorGettingUserMedia, this));
       } else {
-        console.debug("Setting up flash");
         this.video = null;
         swfobject.embedSWF("/flash/camcanvas.swf", "QRScanner", "320", "240", "8.0.0");
       }
@@ -125,7 +123,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
           setTimeout(_.bind(this.captureQR, this), 500);
         }
       } else {
-        console.debug('Trying with flash');
         // Use Flash
         var flash = document.getElementById("QRScanner");
         
@@ -155,7 +152,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
     },
 
     handleRead: function(value) {
-      console.debug(value);
       $.ajax({
         url: "/api/get_access_token",
         context: this,
@@ -163,7 +159,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
         data: 'code='+value,
       }).done(_.bind(function(r) {
         if (r.success) {
-          console.debug("Got an access token: " + r.access_token);
           this.model.set('user', {
             "access_token": r.access_token,
             "expires": r.expires
