@@ -29,13 +29,10 @@
 
 #QRScanner, #QRScanner video {
   width: 330px;
+  height: 240px;
 }
 
-
-
-
-
-
-
-
-
+.well.profile_pic {
+  width: 180px;
+  display: inline-block;
+}

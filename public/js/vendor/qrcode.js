@@ -15,18 +15,18 @@
 //
 //---------------------------------------------------------------------
 
-var qrcode = function() {
+var qrGenerator = function() {
 
 	//---------------------------------------------------------------------
-	// qrcode
+	// qrGenerator
 	//---------------------------------------------------------------------
 
 	/**
-	 * qrcode
+	 * qrGenerator
 	 * @param typeNumber 1 to 10
 	 * @param errorCorrectLevel 'L','M','Q','H'
 	 */
-	var qrcode = function(typeNumber, errorCorrectLevel) {
+	var qrGenerator = function(typeNumber, errorCorrectLevel) {
 
 		var PAD0 = 0xEC;
 		var PAD1 = 0x11;
@@ -468,10 +468,10 @@ var qrcode = function() {
 	};
 
 	//---------------------------------------------------------------------
-	// qrcode.stringToBytes
+	// qrGenerator.stringToBytes
 	//---------------------------------------------------------------------
 
-	qrcode.stringToBytes = function(s) {
+	qrGenerator.stringToBytes = function(s) {
 		var bytes = new Array();
 		for (var i = 0; i < s.length; i += 1) {
 			var c = s.charCodeAt(i);
@@ -481,7 +481,7 @@ var qrcode = function() {
 	};
 
 	//---------------------------------------------------------------------
-	// qrcode.createStringToBytes
+	// qrGenerator.createStringToBytes
 	//---------------------------------------------------------------------
 
 	/**
@@ -489,7 +489,7 @@ var qrcode = function() {
 	 * [16bit Unicode],[16bit Bytes], ...
 	 * @param numChars
 	 */
-	qrcode.createStringToBytes = function(unicodeData, numChars) {
+	qrGenerator.createStringToBytes = function(unicodeData, numChars) {
 
 		// create conversion map.
 
@@ -750,9 +750,9 @@ var qrcode = function() {
 			}
 		};
 
-		_this.getLostPoint = function(qrcode) {
+		_this.getLostPoint = function(qrGenerator) {
 
-			var moduleCount = qrcode.getModuleCount();
+			var moduleCount = qrGenerator.getModuleCount();
 
 			var lostPoint = 0;
 
@@ -762,7 +762,7 @@ var qrcode = function() {
 				for (var col = 0; col < moduleCount; col += 1) {
 
 					var sameCount = 0;
-					var dark = qrcode.isDark(row, col);
+					var dark = qrGenerator.isDark(row, col);
 
 					for (var r = -1; r <= 1; r += 1) {
 
@@ -780,7 +780,7 @@ var qrcode = function() {
 								continue;
 							}
 
-							if (dark == qrcode.isDark(row + r, col + c) ) {
+							if (dark == qrGenerator.isDark(row + r, col + c) ) {
 								sameCount += 1;
 							}
 						}
@@ -797,10 +797,10 @@ var qrcode = function() {
 			for (var row = 0; row < moduleCount - 1; row += 1) {
 				for (var col = 0; col < moduleCount - 1; col += 1) {
 					var count = 0;
-					if (qrcode.isDark(row, col) ) count += 1;
-					if (qrcode.isDark(row + 1, col) ) count += 1;
-					if (qrcode.isDark(row, col + 1) ) count += 1;
-					if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+					if (qrGenerator.isDark(row, col) ) count += 1;
+					if (qrGenerator.isDark(row + 1, col) ) count += 1;
+					if (qrGenerator.isDark(row, col + 1) ) count += 1;
+					if (qrGenerator.isDark(row + 1, col + 1) ) count += 1;
 					if (count == 0 || count == 4) {
 						lostPoint += 3;
 					}
@@ -811,13 +811,13 @@ var qrcode = function() {
 
 			for (var row = 0; row < moduleCount; row += 1) {
 				for (var col = 0; col < moduleCount - 6; col += 1) {
-					if (qrcode.isDark(row, col)
-							&& !qrcode.isDark(row, col + 1)
-							&&  qrcode.isDark(row, col + 2)
-							&&  qrcode.isDark(row, col + 3)
-							&&  qrcode.isDark(row, col + 4)
-							&& !qrcode.isDark(row, col + 5)
-							&&  qrcode.isDark(row, col + 6) ) {
+					if (qrGenerator.isDark(row, col)
+							&& !qrGenerator.isDark(row, col + 1)
+							&&  qrGenerator.isDark(row, col + 2)
+							&&  qrGenerator.isDark(row, col + 3)
+							&&  qrGenerator.isDark(row, col + 4)
+							&& !qrGenerator.isDark(row, col + 5)
+							&&  qrGenerator.isDark(row, col + 6) ) {
 						lostPoint += 40;
 					}
 				}
@@ -825,13 +825,13 @@ var qrcode = function() {
 
 			for (var col = 0; col < moduleCount; col += 1) {
 				for (var row = 0; row < moduleCount - 6; row += 1) {
-					if (qrcode.isDark(row, col)
-							&& !qrcode.isDark(row + 1, col)
-							&&  qrcode.isDark(row + 2, col)
-							&&  qrcode.isDark(row + 3, col)
-							&&  qrcode.isDark(row + 4, col)
-							&& !qrcode.isDark(row + 5, col)
-							&&  qrcode.isDark(row + 6, col) ) {
+					if (qrGenerator.isDark(row, col)
+							&& !qrGenerator.isDark(row + 1, col)
+							&&  qrGenerator.isDark(row + 2, col)
+							&&  qrGenerator.isDark(row + 3, col)
+							&&  qrGenerator.isDark(row + 4, col)
+							&& !qrGenerator.isDark(row + 5, col)
+							&&  qrGenerator.isDark(row + 6, col) ) {
 						lostPoint += 40;
 					}
 				}
@@ -843,7 +843,7 @@ var qrcode = function() {
 
 			for (var col = 0; col < moduleCount; col += 1) {
 				for (var row = 0; row < moduleCount; row += 1) {
-					if (qrcode.isDark(row, col) ) {
+					if (qrGenerator.isDark(row, col) ) {
 						darkCount += 1;
 					}
 				}
@@ -1161,7 +1161,7 @@ var qrcode = function() {
 
 		var _mode = QRMode.MODE_8BIT_BYTE;
 		var _data = data;
-		var _bytes = qrcode.stringToBytes(data);
+		var _bytes = qrGenerator.stringToBytes(data);
 
 		var _this = {};
 
@@ -1628,7 +1628,7 @@ var qrcode = function() {
 	};
 
 	//---------------------------------------------------------------------
-	// returns qrcode function.
+	// returns qrGenerator function.
 
-	return qrcode;
+	return qrGenerator;
 }();

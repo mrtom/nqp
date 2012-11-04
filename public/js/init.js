@@ -42,7 +42,7 @@ require.config({
     },
 
     qr: {
-      exports: "qr"
+      exports: "qrGenerator"
     },
 
     swfobject: {
@@ -50,7 +50,7 @@ require.config({
     },
 
     llqrcode: {
-      exports: "llqrcode"
+      exports: "qrcode"
     }
   }
 

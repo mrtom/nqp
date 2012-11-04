@@ -19,7 +19,7 @@ define([
 ],
 
 // Loads the booth
-function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothNoUserTemplate, boothWithUserTemplate) {
+function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoUserTemplate, boothWithUserTemplate) {
   var BoothView = BaseView.extend({
 
     boothNoUserTemplate: _.template(boothNoUserTemplate),
@@ -52,19 +52,16 @@ function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothN
     },
 
     render: function() {
-      var user = this.model.get('user')
+      var username = this.model.get('username')
 
-      if (user) {
+      if (username) {
         $(this.el).html(this.boothWithUserTemplate(this.model.toJSON()));
       } else {
         $(this.el).html(this.boothNoUserTemplate());
         this.initCanvas();
         qrcode.callback = _.bind(this.handleRead, this);
 
-        this.initQR();
-        // Start polling for QR codes. Add timeout to let stuff init
-        // TODO: Can't we do this with an event please?
-        setTimeout(_.bind(this.captureQR, this), 500);
+        this.initQR();        
       }
     },
 
@@ -89,27 +86,34 @@ function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothN
     },
 
     initQR: function() {
+      console.debug('Initing QR');
       var n=navigator;
-      var vidhtml = '<video id="v" autoplay></video>';
+      this.video=$("#video")[0];
 
       if(n.getUserMedia) {
-        this.video=$("#video")[0];
         n.getUserMedia({video: true, audio: false}, _.bind(this.gotUserMedia, this), _.bind(this.errorGettingUserMedia, this));
       } else if (n.webkitGetUserMedia) {
-        this.video=$("#video")[0];
         this.webkit=true;
         n.webkitGetUserMedia({video: true, audio: false}, _.bind(this.gotUserMedia, this), _.bind(this.errorGettingUserMedia, this));
       } else if(n.mozGetUserMedia) {
-        this.video=$("#video")[0];
         n.mozGetUserMedia({video: true, audio: false}, _.bind(this.gotUserMedia, this), _.bind(this.errorGettingUserMedia, this));
-      }
-      else {
+      } else {
         console.debug("Setting up flash");
+        this.video = null;
         swfobject.embedSWF("/flash/camcanvas.swf", "QRScanner", "320", "240", "8.0.0");
       }
+
+      // Start polling for QR codes. Add timeout to let stuff init
+      // TODO: Can't we do this with an event please?
+      setTimeout(_.bind(this.captureQR, this), 500);
     },
 
     captureQR: function() {
+      if (this.model.get('username')) {
+        // We don't need to capture anymore
+        return;
+      }
+
       if(this.gUM) {
         // Use canvas
         this.gCtx.drawImage(this.video,0,0);
@@ -121,19 +125,20 @@ function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothN
           setTimeout(_.bind(this.captureQR, this), 500);
         }
       } else {
+        console.debug('Trying with flash');
         // Use Flash
         var flash = document.getElementById("QRScanner");
         
         try {
           flash.ccCapture();
         } catch(e) {
+          console.log(e);
           setTimeout(_.bind(this.captureQR, this), 1000);
         }
       }
     }, 
 
     gotUserMedia: function(stream) {
-      console.debug("Got canvas user media");
       if(this.webkit) {
         this.video.src = window.webkitURL.createObjectURL(stream);
       } else {
@@ -145,7 +150,6 @@ function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothN
 
     errorGettingUserMedia: function(error) {
       // TODO: Check this case
-      console.debug("Cannot get canvas user media")
       this.gUM = false;
       return;
     },
@@ -165,24 +169,23 @@ function($, _, Backbone, Bootstrap, swfobject, llqrcode, Booth, BaseView, boothN
             "expires": r.expires
           });
 
-          window.foo = function(r) {
-            console.log("Global foo called");
-            console.log(r);
-          };
+          var callbackName = this.options.router.addCallback(_.bind(function(r) {
+            this.model.set('username', r.name);
+            this.model.set('profilePic', r.picture.data.url);
+
+            this.render();
+          }, this));
 
           $.ajax({
-            url: "https://graph.facebook.com/me",
+            url: "https://graph.facebook.com/me?fields=id,name,picture.type(large)",
             crossDomain: true,
             data: {
               "method": "get",
               "access_token": this.model.get('user').access_token,
               "pretty": 0,
-              "callback": "foo"
+              "callback": callbackName
             }
-          }).done(_.bind(function(r) {
-            console.log(r);
-          }, this));
-
+          });
         } else {
           console.error("Could not get access token from API endpoint");
         }

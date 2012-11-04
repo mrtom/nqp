@@ -13,7 +13,7 @@ define([
   "text!template/mainTemplate.html"
 ],
 
-function($, _, Backbone, Bootstrap, qr, BaseView, mainTemplate) {
+function($, _, Backbone, Bootstrap, qrGenerator, BaseView, mainTemplate) {
 
   var MainView = BaseView.extend({
     mainTemplate: _.template(mainTemplate),
@@ -79,7 +79,7 @@ function($, _, Backbone, Bootstrap, qr, BaseView, mainTemplate) {
       var code = code_to_draw || this.model.get('code');
       if (!code) return;
 
-      var qr = qrcode(4, 'M');
+      var qr = qrGenerator(4, 'M');
       qr.addData(code);
       qr.make();
 

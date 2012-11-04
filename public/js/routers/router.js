@@ -24,105 +24,119 @@ function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothVie
                 
   var Workspace = Backbone.Router.extend({
 
-   localStorageKey: "nqp-user",
+  localStorageKey: "nqp-user",
+  callbackIndex: 0,
 
-    routes: {
-      ""            : "showChrome",
-      "account"     : "showAccount",
-      "booth"   : "showBooth",
-      "*other"      : "showFourOhFour"
-    },
 
-    initialize: function() {
-      this.user = new User;
-    },
+  routes: {
+    ""            : "showChrome",
+    "account"     : "showAccount",
+    "booth"   : "showBooth",
+    "*other"      : "showFourOhFour"
+  },
 
-    // Show the main page
-    showChrome: function(mainModel, mainViewType) {
-      console.debug('Showing Chrome');
-      this.destroyPrimary(this.chrome, this.chromeView);
+  initialize: function() {
+    this.user = new User;
+  },
 
-      if (!mainViewType) {
-        console.debug("No view specified. Showing mainView");
-        mainViewType = MainView;
-        mainModel = this.user;
-      }
+  // Show the main page
+  showChrome: function(mainModel, mainViewType) {
+    console.debug('Showing Chrome');
+    this.destroyPrimary(this.chrome, this.chromeView);
 
-      this.chromeView = new ChromeView({
-        router: this,
-        mainModel: mainModel,
-        mainViewType: mainViewType,
-        user: this.user
-      });
-    },
-
-    // show the account/profile page
-    showAccount: function() {
-      console.debug('Showing account');
-      return this.showChrome(new Account({
-        user: this.user
-      }), AccountView);
-    },
-
-    // show the booth
-    showBooth: function() {
-      console.debug('Showing booth');
-      this.destroyPrimary(this.chrome, this.chromeView);
-
-      this.boothModel = new Booth();
-      this.boothView = new BoothView({
-        router : this,
-        model  : this.boothModel
-      });
-    },
-
-    showFourOhFour: function(route) {
-      console.debug('Showing 404');
-      this.destroyPrimary(this.chrome, this.chromeView);
-
-      this.showChrome(
-        new FourOhFour({
-          route: route
-        }),
-        FourOhFourView
-      );
-    },
-
-    destroyPrimary: function(/* Backbone.Model */ model, /* Backbone.View */ view) {
-      if (view) {
-        view.destroy();
-        view = null;
-      }
-      if (model) {
-        model.clear({silent: true});
-        model = null;
-      }
-    },
-
-    saveUser: function() {
-      // Store in localStorage
-      if (localStorage) {
-        localStorage.setItem(this.localStorageKey, JSON.stringify(this.user));
-        return true;
-      }
-      return false;
-    },
-
-    getSavedUser: function() {
-      if (localStorage) {
-        return JSON.parse(localStorage.getItem(this.localStorageKey));
-      }
-      return null;
-    },
-
-    removeSavedUser: function() {
-      if (localStorage) {
-        localStorage.removeItem(this.localStorageKey);
-      }
-      return false;
+    if (!mainViewType) {
+      console.debug("No view specified. Showing mainView");
+      mainViewType = MainView;
+      mainModel = this.user;
     }
 
-  });
-                      
-  return Workspace;
+    this.chromeView = new ChromeView({
+      router: this,
+      mainModel: mainModel,
+      mainViewType: mainViewType,
+      user: this.user
+    });
+  },
+
+  // show the account/profile page
+  showAccount: function() {
+    console.debug('Showing account');
+    return this.showChrome(new Account({
+      user: this.user
+    }), AccountView);
+  },
+
+  // show the booth
+  showBooth: function() {
+    console.debug('Showing booth');
+    this.destroyPrimary(this.chrome, this.chromeView);
+
+    this.boothModel = new Booth();
+    this.boothView = new BoothView({
+      router : this,
+      model  : this.boothModel
+    });
+  },
+
+  showFourOhFour: function(route) {
+    console.debug('Showing 404');
+    this.destroyPrimary(this.chrome, this.chromeView);
+
+    this.showChrome(
+      new FourOhFour({
+        route: route
+      }),
+      FourOhFourView
+    );
+  },
+
+  destroyPrimary: function(/* Backbone.Model */ model, /* Backbone.View */ view) {
+    if (view) {
+      view.destroy();
+      view = null;
+    }
+    if (model) {
+      model.clear({silent: true});
+      model = null;
+    }
+  },
+
+  saveUser: function() {
+    // Store in localStorage
+    if (localStorage) {
+      localStorage.setItem(this.localStorageKey, JSON.stringify(this.user));
+      return true;
+    }
+    return false;
+  },
+
+  getSavedUser: function() {
+    if (localStorage) {
+      return JSON.parse(localStorage.getItem(this.localStorageKey));
+    }
+    return null;
+  },
+
+  removeSavedUser: function() {
+    if (localStorage) {
+      localStorage.removeItem(this.localStorageKey);
+    }
+    return false;
+  },
+
+  addCallback: function(/* function */ cb) {
+    var functionName = "global_callback_"+this.callbackIndex;
+    window[functionName] = function(response) {
+      console.log("Calling global callback");
+      cb(response);
+      window[functionName] = null;
+    }
+
+    this.callbackIndex++;
+    return functionName;
+  }
+
+});
+                    
+return Workspace;
 });
