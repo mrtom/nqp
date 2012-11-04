@@ -7,8 +7,9 @@ NQP is a simple demonstration of how to take the Facebook Platform offline. User
  * Load the 'booth' - http://telliott.net:18274/booth. Requires a modern browser with user media support and an attached webcbam. Tested on Chrome 22. Use that. Allow access to the camera. 
  * Load the user code - http://telliott.net:18274/. Use your smartphone ideally.
  * Scan your code from your smartphone with the webcam. The 'booth' should show a personalised view.
- * ![User View](https://github.com/mrtom/nqp/raw/master/docs/images/UserView.png  "User view")
- * ![Allow Camera](https://github.com/mrtom/nqp/raw/master/docs/images/AllowCamera.png  "Allow Camera") ![Scan Code](https://github.com/mrtom/nqp/raw/master/docs/images/ScanCode.png "Scan Code") ![Personalised Experience](https://github.com/mrtom/nqp/raw/master/docs/images/BoothPersonalisesExperience.png "Personalised Experience")
+
+![User View](https://github.com/mrtom/nqp/raw/master/docs/images/UserView.png  "User view")
+![Allow Camera](https://github.com/mrtom/nqp/raw/master/docs/images/AllowCamera.png  "Allow Camera") ![Scan Code](https://github.com/mrtom/nqp/raw/master/docs/images/ScanCode.png "Scan Code") ![Personalised Experience](https://github.com/mrtom/nqp/raw/master/docs/images/BoothPersonalisesExperience.png "Personalised Experience")
 
 ## Instalation
 
