@@ -17,6 +17,7 @@ require.config({
     bootstrap:  "./vendor/bootstrap.min",
     qr:         "./vendor/qrcode",
     text:       "./vendor/require/text",
+    html5WebCam:"./vendor/html5-webcam",
     swfobject:  "./vendor/swfobject",
     llqrcode:   "./vendor/qr_reader/llqrcode"
   },
@@ -51,7 +52,9 @@ require.config({
 
     llqrcode: {
       exports: "qrcode"
-    }
+    },
+
+    "plugins/jquery.masonry.min": ["jquery"]
   }
 
 });

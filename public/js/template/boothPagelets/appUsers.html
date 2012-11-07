@@ -1,0 +1,10 @@
+<h5>Friends Using NQP</h5>
+<div class="list">
+  <ul>
+    <% _.each(friends, function(friend) { %> 
+      <li>
+        <img src=<%= friend.pic_square %> class="image_shadow" />
+      </li> 
+    <% }); %>
+  </ul>
+</div>

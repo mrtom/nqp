@@ -12,6 +12,9 @@ define([
 
   // Views
   "views/base",
+  "views/boothPagelets/appUsers",
+  "views/boothPagelets/fbPics",
+  "views/boothPagelets/takePhoto",
 
   // Templates
   "text!template/boothNoUserTemplate.html",
@@ -19,7 +22,7 @@ define([
 ],
 
 // Loads the booth
-function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoUserTemplate, boothWithUserTemplate) {
+function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsersView, FBPicsView, TakePhotoView, boothNoUserTemplate, boothWithUserTemplate) {
   var BoothView = BaseView.extend({
 
     boothNoUserTemplate: _.template(boothNoUserTemplate),
@@ -38,17 +41,24 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
       // Turn on bootstrap data-api
       $('body').on('.data-api');
 
-      // Load QR support
-      if (!this.isCanvasSupported()) {
-        var errorStr = "This demo requires canvas! Aborting...";
-        console.error(errorStr);
-        alert(errorStr);
+      if (this.options.code) {
+        // We already have the user code. Just render the user page
+        // This is only used for quick access during debugging
+        // Don't use in production! TODO: Enforce this rule programatically
+        this.handleRead(this.options.code);
+        $('#bootstrap').append(this.$el);
+      } else {
+        // Load QR support
+        if (!this.isCanvasSupported()) {
+          var errorStr = "This demo requires canvas! Aborting...";
+          console.error(errorStr);
+          alert(errorStr);
 
-        return;
-      } 
-      
-      $('#bootstrap').append(this.$el);
-      this.render();
+          return;
+        }
+        $('#bootstrap').append(this.$el);
+        this.render();
+      }
     },
 
     render: function() {
@@ -56,6 +66,10 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
 
       if (username) {
         $(this.el).html(this.boothWithUserTemplate(this.model.toJSON()));
+
+        if (!this.pageletsInited) {
+          this.initPagelets();
+        }
       } else {
         $(this.el).html(this.boothNoUserTemplate());
         this.initCanvas();
@@ -151,6 +165,29 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
       return;
     },
 
+    initPagelets: function() {
+      // Add in the pagelets
+      this.appUsersPagelet = new AppUsersView({
+        el: this.$('.appUsers'),
+        model: this.model,
+        router: this.options.router
+      });
+
+      this.facebookPicsPagelet = new FBPicsView({
+        el: this.$('#fbpics'),
+        model: this.model,
+        router: this.options.router
+      });
+
+      this.newPicPagelet = new TakePhotoView({
+        el: this.$('#takenew'),
+        model: this.model,
+        router: this.options.router
+      });
+
+      this.pageletsInited = true;
+    },
+
     handleRead: function(value) {
       $.ajax({
         url: "/api/get_access_token",
@@ -172,9 +209,10 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, boothNoU
           }, this));
 
           $.ajax({
-            url: "https://graph.facebook.com/me?fields=id,name,picture.type(large)",
+            url: "https://graph.facebook.com/me",
             crossDomain: true,
             data: {
+              "fields": "id,name,picture.type(large)",
               "method": "get",
               "access_token": this.model.get('user').access_token,
               "pretty": 0,

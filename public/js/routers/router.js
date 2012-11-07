@@ -31,7 +31,8 @@ function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothVie
   routes: {
     ""            : "showChrome",
     "account"     : "showAccount",
-    "booth"   : "showBooth",
+    "booth"       : "showBooth",
+    "booth/*code" : "showBooth",
     "*other"      : "showFourOhFour"
   },
 
@@ -67,14 +68,15 @@ function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothVie
   },
 
   // show the booth
-  showBooth: function() {
+  showBooth: function(code) {
     console.debug('Showing booth');
     this.destroyPrimary(this.chrome, this.chromeView);
 
     this.boothModel = new Booth();
     this.boothView = new BoothView({
       router : this,
-      model  : this.boothModel
+      model  : this.boothModel,
+      code   : code
     });
   },
 

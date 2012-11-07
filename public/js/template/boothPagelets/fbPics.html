@@ -1,0 +1,9 @@
+<ul class="thumbnails">
+  <% _.each(fb_pics, function(picture) { %> 
+    <li class="span4">
+      <a href="#" class="thumb image_shadow">
+        <img src="<%= picture.images[5].source %>" alt="<%= picture.name %>">
+      </a>
+    </li> 
+  <% }); %>
+</ul>
