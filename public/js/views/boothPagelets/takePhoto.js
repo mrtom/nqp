@@ -44,7 +44,7 @@ function($, _, Backbone, WebCamController, Booth, BaseView, takePhotoTemplate) {
 
     takePhoto: function() {
       this.webcam.createSnapshot();
-      console.log(this.webcam.getSnapshot());
+      console.log("This doesn't actually do anything yet");
     }
 
   })
