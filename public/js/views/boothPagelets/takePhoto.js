@@ -32,19 +32,23 @@ function($, _, Backbone, WebCamController, Booth, BaseView, takePhotoTemplate) {
     render: function() {
       $(this.el).html(this.takePhotoTemplate(this.model.toJSON()));
 
-      var video = $('.cameraViewer')[0];
-      var img = $('.cameraPic')[0];
+      this.video = $('.cameraViewer')[0];
+      this.img = $('.cameraPic')[0];
 
       if (!this.webcam) {
-        this.webcam = new WebCamController(video, img);
+        this.webcam = new WebCamController(this.video, this.img);
       } else {
-        this.webcam.bindElements(video, img);
+        this.webcam.bindElements(this.video, this.img);
       }
     },
 
     takePhoto: function() {
       this.webcam.createSnapshot();
-      console.log("This doesn't actually do anything yet");
+      alert("This doesn't actually do anything yet!");
+
+      //$(this.video).addClass('hide');
+      //$(this.img).removeClass('hide');
+      //$('#takePhoto').attr("disabled", "true");
     }
 
   })

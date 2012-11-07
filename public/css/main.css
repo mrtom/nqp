@@ -90,3 +90,7 @@
 #takenew .button-row{
   padding: 10px 0;
 }
+
+#takenew video {
+  margin: 0; /* No idea why this is needed, bootstrap? */
+}
