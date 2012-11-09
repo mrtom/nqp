@@ -37,6 +37,8 @@ function($, _, Backbone, Bootstrap, qrGenerator, BaseView, mainTemplate) {
             case 'unknown':
               // Fall through
             case 'not_authorized':
+              this.model.set('signedRequest', null);
+              this.options.router.removeSavedUser();
               break;
             case 'connected': 
               $('#loginModal').modal('hide');
@@ -59,20 +61,23 @@ function($, _, Backbone, Bootstrap, qrGenerator, BaseView, mainTemplate) {
     },
 
     getCode: function() {
-      $.ajax({
-        url: "/api/gen",
-        context: this,
-        type: "POST",
-        data: 'signed_request='+this.model.get('signedRequest'),
-      }).done(function(r) {
-        if (r.code) {
-          this.model.set('code', r.code);
-          this.options.router.saveUser();
+      var signedRequest = this.model.get('signedRequest');
+      if (signedRequest) {
+        $.ajax({
+          url: "/api/gen",
+          context: this,
+          type: "POST",
+          data: 'signed_request='+this.model.get('signedRequest'),
+        }).done(function(r) {
+          if (r.code) {
+            this.model.set('code', r.code);
+            this.options.router.saveUser();
 
-        } else {
-          // TODO: Error!
-        }
-      });
+          } else {
+            // TODO: Error!
+          }
+        });        
+      }
     },
 
     drawQrCode: function(model, code_to_draw) {
