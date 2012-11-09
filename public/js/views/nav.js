@@ -28,41 +28,47 @@ function($, _, Backbone, Bootstrap, BaseView, navTemplate) {
 
       require( ['FB!'], _.bind(function() {
         FB.Event.subscribe('auth.statusChange', _.bind(function(response) {
-          switch(response.status) {
-            case 'unknown':
-              // Fall through
-            case 'not_authorized':
-              console.debug('Must login!');
-              window.FB.XFBML.parse($('#loginModal')[0]);
-              $("#loginModal").modal();
-              break;
-            case 'connected': 
-              $('#loginModal').modal('hide');
-
-              var uid = response.authResponse.userID;
-              var signedRequest = response.authResponse.signedRequest;
-              console.debug('woop! Welcome user #'+uid);
-
-              FB.api('me?fields=id,name,picture.type(square)', _.bind(function(r) {
-                this.model.get('user').set({
-                  'uid': uid,
-                  'name': r.name,
-                  'pic': r.picture.data.url,
-                  'loaded': true,
-                  'signedRequest': signedRequest
-                });
-              }, this));
-              break;
-              default:
-                console.log("Unexpected responsen from Facebook auth: `" + response.status + "` not recognised!")
-          }
+          this.handleAuthStatusChange(response);
         }, this));
 
         if (!this.model.get('signedRequest')) {
           // Force FB auth.authResponseChange event
-          FB.getLoginStatus();
+          FB.getLoginStatus(_.bind(function(r) {
+            this.handleAuthStatusChange(r);
+          }, this), true);
         }
       }, this));
+    },
+
+    handleAuthStatusChange: function(response) {
+      switch(response.status) {
+        case 'unknown':
+          // Fall through
+        case 'not_authorized':
+          console.debug('Must login!');
+          window.FB.XFBML.parse($('#loginModal')[0]);
+          $("#loginModal").modal();
+          break;
+        case 'connected': 
+          $('#loginModal').modal('hide');
+
+          var uid = response.authResponse.userID;
+          var signedRequest = response.authResponse.signedRequest;
+          console.debug('woop! Welcome user #'+uid);
+
+          FB.api('me?fields=id,name,picture.type(square)', _.bind(function(r) {
+            this.model.get('user').set({
+              'uid': uid,
+              'name': r.name,
+              'pic': r.picture.data.url,
+              'loaded': true,
+              'signedRequest': signedRequest
+            });
+          }, this));
+          break;
+          default:
+            console.log("Unexpected responsen from Facebook auth: `" + response.status + "` not recognised!")
+      }
     },
 
     render: function() {
