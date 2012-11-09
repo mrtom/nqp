@@ -5,20 +5,16 @@ define([
   "backbone",
 
   // Models
-  "models/account",
-  "models/booth",
   "models/fourohfour",
   "models/user",
 
   // Views
-  "views/account",
-  "views/booth",
   "views/chrome",
   "views/fourohfour",
   "views/main"
 ], 
 
-function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothView, ChromeView, FourOhFourView, MainView) {
+function($, _, Backbone, FourOhFour, User, ChromeView, FourOhFourView, MainView) {
   // App Router
   // ---------- 
                 
@@ -62,22 +58,29 @@ function($, _, Backbone, Account, Booth, FourOhFour, User, AccountView, BoothVie
   // show the account/profile page
   showAccount: function() {
     console.debug('Showing account');
-    return this.showChrome(new Account({
-      user: this.user
-    }), AccountView);
+    require(['models/account', 'views/account'], _.bind(function(Account, AccountView){
+      return this.showChrome(new Account({
+        user: this.user
+      }), AccountView);
+    }, this));
   },
 
   // show the booth
   showBooth: function(code) {
     console.debug('Showing booth');
-    this.destroyPrimary(this.chrome, this.chromeView);
 
-    this.boothModel = new Booth();
-    this.boothView = new BoothView({
-      router : this,
-      model  : this.boothModel,
-      code   : code
-    });
+    // Require Booth inline as we don't want to ship all the extra stuff
+    // to the user client
+    require(['models/booth', 'views/booth'], _.bind(function(Booth, BoothView){
+      this.destroyPrimary(this.chrome, this.chromeView);
+
+      this.boothModel = new Booth();
+      this.boothView = new BoothView({
+        router : this,
+        model  : this.boothModel,
+        code   : code
+      });
+    }, this));
   },
 
   showFourOhFour: function(route) {

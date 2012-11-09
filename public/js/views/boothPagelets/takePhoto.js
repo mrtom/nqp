@@ -3,7 +3,7 @@ define([
   "jquery",
   "underscore",
   "backbone",
-  "html5WebCam",
+  "vendor/html5-webcam",
 
   // Models
   "models/booth",
