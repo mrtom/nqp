@@ -6,8 +6,8 @@ define(function() {
       } else {
         window.fbAsyncInit = function() {
           FB.init({
-            appId      : '426695997394974', // App ID
-            channelUrl : '//'+window.location.hostname+'/channel.html', // Channel File
+            appId      : window._backbone_config_fb_app_id,
+            channelUrl : '//'+window.location.hostname+'/channel.html',
             status     : true, // check login status
             cookie     : true, // enable cookies to allow the server to access the session
             xfbml      : false // don't parse XFBML
