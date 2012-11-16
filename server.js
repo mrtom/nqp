@@ -29,14 +29,22 @@ var app = express.createServer();
 var db  = new sqlite3.Database('./db/master.sqlite');
 
 var FACEBOOK_SECRET = (config && config.app ? config.app.secret : process.env.FACEBOOK_SECRET);
-if (!FACEBOOK_SECRET) {
+var FACEBOOK_APP_ID = (config && config.app ? config.app.app_id : process.env.FACEBOOK_APP_ID);
+if (!FACEBOOK_SECRET || !FACEBOOK_APP_ID) {
   throw "Could not find Facebook details"
 }
 
 app.configure(function() {
   app.use(express.bodyParser());
   app.use(express.cookieParser());
-  
+
+  app.set("view options", { layout: false });
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'jade')
+  app.get('/', function(req, res){
+    res.render('index', {fb_app_id:FACEBOOK_APP_ID});
+  });
+
   app.use(express.static(__dirname + '/public'));
   
   app.post('/api/gen', function(req, res) {
@@ -108,6 +116,14 @@ app.configure(function() {
     res.header('Content-Type', 'text/html');
     res.sendfile('public/index.html');
   });
+});
+
+app.configure('dev', function(){
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+});
+
+app.configure('prod', function(){
+    app.use(express.errorHandler()); 
 });
 
 function decodeSignedRequest(signedRequest, callback) {
