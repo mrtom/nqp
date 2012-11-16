@@ -114,7 +114,7 @@ app.configure(function() {
   app.use(function(req, res, next){
     // Let backbone handle 404s
     res.header('Content-Type', 'text/html');
-    res.sendfile('public/index.html');
+    res.render('index', {fb_app_id:FACEBOOK_APP_ID});
   });
 });
 
