@@ -15,6 +15,9 @@ define([
   "text!template/accountTemplate.html"
 ],
 
+/*
+ * A simple account View
+ */
 function($, _, Backbone, User, BaseView, navView, accountTemplate) {
 
   var AccountView = BaseView.extend({

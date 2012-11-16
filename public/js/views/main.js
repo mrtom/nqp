@@ -13,6 +13,10 @@ define([
   "text!template/mainTemplate.html"
 ],
 
+/*
+ * This is the main user view.
+ * The responsiblity of this view is to show the user's QR code once they're logged in
+ */
 function($, _, Backbone, Bootstrap, qrGenerator, BaseView, mainTemplate) {
 
   var MainView = BaseView.extend({

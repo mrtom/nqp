@@ -21,7 +21,14 @@ define([
   "text!template/boothWithUserTemplate.html"
 ],
 
-// Loads the booth
+/*
+ * The Booth View
+ * The purpose of this view is to ask the user to log in (via their QR code), and then demonstrate that the content
+ * can be personalised to the user using the Facebook APIs
+ *
+ * Please note, it is just a demo! This is not supposed to represent a fully working booth, as the content required
+ * would be specific for each installation
+ */
 function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsersView, FBPicsView, TakePhotoView, boothNoUserTemplate, boothWithUserTemplate) {
   var BoothView = BaseView.extend({
 

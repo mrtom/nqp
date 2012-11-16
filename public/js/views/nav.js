@@ -12,6 +12,9 @@ define([
   "text!template/navTemplate.html",
 ],
 
+/*
+ * The Nav View contains the black bar at the top of the page, and is responsible for logging a user in
+ */
 function($, _, Backbone, Bootstrap, BaseView, navTemplate) {
 
   var NavView = BaseView.extend({

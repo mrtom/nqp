@@ -17,7 +17,9 @@ define([
   "text!template/chromeTemplate.html"
 ],
 
-// Loads a main view within the app Chrome, i.e. with the NavBar
+/*
+ * The Chrome view loads a provided 'main' view within the app Chrome, i.e. with the NavBar
+ */
 function($, _, Backbone, Bootstrap, Nav, User, BaseView, navView, chromeTemplate) {
   var ChromeView = BaseView.extend({
 

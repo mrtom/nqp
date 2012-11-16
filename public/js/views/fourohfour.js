@@ -14,6 +14,9 @@ define([
   "text!template/fourohfourTemplate.html"
 ],
 
+/*
+ * View to load when URL is not recognised
+ */
 function($, _, Backbone, User, BaseView, fourohfourTemplate) {
 
   var FourOhFourView = BaseView.extend({
