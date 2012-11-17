@@ -35,9 +35,9 @@ body
 
   script(data-main="/js/init", src="/js/vendor/require/require.js")
   script
-    // TODO: Think harder about this
-    // Set the app id on the window, so we can access it from Backbone
-    window._backbone_config_fb_app_id=#{fb_app_id}
+    requirejs.config({
+      fb_app_id: #{fb_app_id}
+    });
 
     // Google analytics
     var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];

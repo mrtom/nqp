@@ -6,7 +6,7 @@ define(function() {
       } else {
         window.fbAsyncInit = function() {
           FB.init({
-            appId      : window._backbone_config_fb_app_id,
+            appId      : config.fb_app_id,
             channelUrl : '//'+window.location.hostname+'/channel.html',
             status     : true, // check login status
             cookie     : true, // enable cookies to allow the server to access the session
