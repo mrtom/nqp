@@ -1,0 +1,41 @@
+<div class="main container">
+  <div class="row-fluid">
+    <div class="span4" ></div>
+    <div class="span4 center" >
+      <h2>Welcome to NQP!</h2>
+      <p>Scan your card to get started</p>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span6 offset3 well">
+      <p>This is a demonstration of using <a href="https://developers.facebook.com/docs/howtos/login/devices/" target="blank">Facebook Device Auth</a> to integrate Facebook Platform with your existing loyalty or customer ID system. However, because this is just an example we don't have an existing loyalty system :)</p>
+      <p>Let's assume you have a store card for NQP, and there's a barcode scanner attached to this computer. You'd be asked to scan the card. Hit the button below to simulate scanning your card...</p>
+    </div>
+  </div>
+
+  <div id="scanCardRow" class="row-fluid">
+    <div class="span4 offset4 center">
+      <button id="scanCard" class="btn btn-large btn-inverse" type="button">Scan Card</button>
+    </div>
+  </div>
+
+  <div id="externalUIDRow" class="row-fluid">
+    <div class="span6 offset3 well center">
+      <h5 id="externalUID">Your card has ID <%= externalUID %></h5>
+    </div>
+  </div>
+
+  <div id="deviceAuthCodeRow" class="row-fluid">
+    <div class="span6 offset3 well center">
+      <h1><span class="text-info"><%= deviceAuthCode %></span></h1>
+      <p id="deviceAuthCode">Please enter <%= deviceAuthCode %> at <strong><%= deviceAuthVerificationURL %></strong> now</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <footer>
+    <p>NQP App - <a href="https://github.com/mrtom/nqp">Fork me on Github!</a></p>
+  </footer>
+</div>

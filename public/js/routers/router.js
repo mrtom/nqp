@@ -29,6 +29,7 @@ function($, _, Backbone, FourOhFour, User, ChromeView, FourOhFourView, MainView)
     "account"     : "showAccount",
     "booth"       : "showBooth",
     "booth/*code" : "showBooth",
+    "dab"         : "showDab",
     "*other"      : "showFourOhFour"
   },
 
@@ -76,6 +77,23 @@ function($, _, Backbone, FourOhFour, User, ChromeView, FourOhFourView, MainView)
 
       this.boothModel = new Booth();
       this.boothView = new BoothView({
+        router : this,
+        model  : this.boothModel,
+        code   : code
+      });
+    }, this));
+  },
+
+  showDab: function(code) {
+    console.debug('Showing Device Auth booth');
+
+    // Require Booth inline as we don't want to ship all the extra stuff
+    // to the user client
+    require(['models/dab', 'views/dab'], _.bind(function(Dab, DabView){
+      this.destroyPrimary(this.chrome, this.chromeView);
+
+      this.boothModel = new Dab();
+      this.boothView = new DabView({
         router : this,
         model  : this.boothModel,
         code   : code

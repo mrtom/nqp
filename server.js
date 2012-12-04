@@ -23,7 +23,8 @@ var express = require('express'),
     restler = require('restler'),
     qs      = require('querystring'),
     sqlite3 = require('sqlite3'),
-    async   = require('async');
+    async   = require('async'),
+    dab     = require('./dabUtils.js');
 
 var app = express.createServer();
 var db  = new sqlite3.Database('./db/master.sqlite');
@@ -102,6 +103,69 @@ app.configure(function() {
               'expires': rows[0].expires
             }));
           }
+        }
+      });
+    } else {
+      sendInternalServerError(res);
+    }
+  });
+
+  app.get('/api/get_device_auth_code', function(req, res) {
+    console.log("Received new API call to /api/get_device_auth_code");
+
+    var externalUID = req.query["externalUID"];
+    var scope = "user_photos,publish_actions";
+
+    if (externalUID) {
+      async.waterfall([
+        function(cb){
+          cb(null, FACEBOOK_APP_ID, scope);
+        },
+        dab.generateCode
+      ],
+      function(err, response) {
+        if (err) {
+          console.log(err);
+          sendInternalServerError(res);
+        } else {
+          res.header('Content-Type', 'text/json');
+          res.send(JSON.stringify({
+            success: "true",
+            data: response
+          }));        
+        }
+      });
+    } else {
+      sendInternalServerError(res);
+    }
+  });
+
+  app.get('/api/check_for_access_token', function(req, res) {
+    console.log("Received new API call to /api/check_for_access_token");
+
+    var verificationCode = req.query["verificationCode"];
+
+    if (verificationCode) {
+      async.waterfall([
+        function(cb){
+          cb(null, FACEBOOK_APP_ID, verificationCode);
+        },
+        dab.pollFacebook
+      ],
+      function(err, response) {
+        if (err) {
+          // Let the client handle errors
+          res.header('Content-Type', 'text/json');
+          res.send(JSON.stringify({
+            success: "false",
+            message: err.error.message
+          }));
+        } else {
+          res.header('Content-Type', 'text/json');
+          res.send(JSON.stringify({
+            success: "true",
+            data: response
+          }));        
         }
       });
     } else {
@@ -273,11 +337,25 @@ function sendAccessToken(err, encodedCode, res) {
   }
 };
 
-function sendInternalServerError(res) {
-  res.header('Content-Type', 'text/json');
-  res.status(500);
-  res.write(JSON.stringify({'success': false}));
+function sendBadRequest(res, message, statuscode) {
+  sendError(res, message, statuscode || 400);
+}
+
+function sendInternalServerError(res, message) {
+  sendError(res, message, 500);
 };
+
+function sendError(res, message, statuscode) {
+  res.header('Content-Type', 'text/json');
+  res.status(statuscode);
+
+  response = {'success': false};
+  if (message) {
+    response.message = message;
+  }
+
+  res.write(JSON.stringify(response));
+}
 
 // sigh no ipv6
 // Do some shuffling for heroku vs localhost
