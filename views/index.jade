@@ -36,7 +36,10 @@ body
   script(data-main="/js/init", src="/js/vendor/require/require.js")
   script
     requirejs.config({
-      fb_app_id: #{fb_app_id}
+      config: {
+        fb_app_id       : #{fb_app_id},
+        use_device_auth : #{use_device_auth}
+      }
     });
 
     // Google analytics

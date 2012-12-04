@@ -6,7 +6,7 @@ define(function() {
       } else {
         window.fbAsyncInit = function() {
           FB.init({
-            appId      : config.fb_app_id,
+            appId      : config.config.fb_app_id,
             channelUrl : '//'+window.location.hostname+'/channel.html',
             status     : true, // check login status
             cookie     : true, // enable cookies to allow the server to access the session
@@ -16,15 +16,14 @@ define(function() {
         };
 
         // Load the SDK asynchronously
-        (function(d){
+        (function(d, debug){
           var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
           if (d.getElementById(id)) {return;}
           js = d.createElement('script'); js.id = id; js.async = false;
-          js.src = "//connect.facebook.net/en_US/all.js";
+          js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
           ref.parentNode.insertBefore(js, ref);
-        }(document));
+       }(document, /*debug*/ false));
       }
     }
   };
 });
-

@@ -41,9 +41,7 @@ app.configure(function() {
   app.set("view options", { layout: false });
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade')
-  app.get('/', function(req, res){
-    res.render('index', {fb_app_id:FACEBOOK_APP_ID});
-  });
+  app.get('/', sendToBackbone);
 
   app.use(express.static(__dirname + '/public'));
   
@@ -112,9 +110,9 @@ app.configure(function() {
   });
 
   app.use(function(req, res, next){
-    // Let backbone handle 404s
+    // Let backbone handle 404s and non-api paths
     res.header('Content-Type', 'text/html');
-    res.render('index', {fb_app_id:FACEBOOK_APP_ID});
+    sendToBackbone(req, res);
   });
 });
 
@@ -125,6 +123,13 @@ app.configure('dev', function(){
 app.configure('prod', function(){
     app.use(express.errorHandler()); 
 });
+
+function sendToBackbone(req, res) {
+  res.render('index', {
+    fb_app_id       : FACEBOOK_APP_ID,
+    use_device_auth : config.use_device_auth
+  });
+};
 
 function decodeSignedRequest(signedRequest, callback) {
     // Decode signed Request
