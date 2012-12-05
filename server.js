@@ -38,6 +38,7 @@ if (!FACEBOOK_SECRET || !FACEBOOK_APP_ID) {
 app.configure(function() {
   app.use(express.bodyParser());
   app.use(express.cookieParser());
+  express.session({ secret: SECRET});
 
   app.set("view options", { layout: false });
   app.set('views', __dirname + '/views');

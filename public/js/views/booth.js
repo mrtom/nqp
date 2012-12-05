@@ -43,10 +43,16 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
     video: null,
     c: null,
 
+    events: {
+      "click #logOutBooth" : "logOutBooth"
+    },
+
     initialize: function() {
       // Load appwide defaults
       // Turn on bootstrap data-api
       $('body').on('.data-api');
+
+      console.log(this.model.attributes);
 
       if (this.options.code) {
         // We already have the user code. Just render the user page
@@ -74,7 +80,7 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
       if (username) {
         $(this.el).html(this.boothWithUserTemplate(this.model.toJSON()));
 
-        if (!this.pageletsInited) {
+        if (!this.model.get('pageletsInited')) {
           this.initPagelets();
         }
       } else {
@@ -192,10 +198,11 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
         router: this.options.router
       });
 
-      this.pageletsInited = true;
+      this.model.set('pageletsInited', true);
     },
 
     handleRead: function(value) {
+      console.debug(value);
       $.ajax({
         url: "/api/get_access_token",
         context: this,
@@ -230,6 +237,11 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
           console.error("Could not get access token from API endpoint");
         }
       }, this));
+    },
+
+    logOutBooth: function() {
+      this.model.reset();
+      this.render();
     }
     
   });

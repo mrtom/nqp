@@ -34,7 +34,8 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
     boothWithUserTemplate: _.template(boothWithUserTemplate),
 
     events: {
-      "click #scanCard" : "cardScanned"
+      "click #scanCard"    : "cardScanned",
+      "click #logOutBooth" : "logOutBooth"
     },
 
     initialize: function() {
