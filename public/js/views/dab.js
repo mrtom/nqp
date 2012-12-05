@@ -93,7 +93,10 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
     cardScanned: function() {
       console.debug("Card scanned");
 
-      var externalUID = new Date().getTime() + String(Math.random()).substr(2);
+      var externalUID = $("#cardNumber").val();
+      if (!externalUID) {
+        externalUID = new Date().getTime() + String(Math.random()).substr(2);
+      }
 
       this.model.set('externalUID', externalUID);
       this.model.set('fadeNode', 'externalUID');
@@ -106,7 +109,7 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
       );
 
       $.ajax({
-        url: "/api/get_device_auth_code",
+        url: "/api/get_access_token_or_device_auth_code",
         context: this,
         type: "GET",
         data: "externalUID="+externalUID

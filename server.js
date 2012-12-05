@@ -60,10 +60,11 @@ app.configure(function() {
       createOrUpdateUserRecord
     ],
     function(err, encodedCode) {
-      sendAccessToken(err, encodedCode, res);
+      sendHashCode(err, encodedCode, res);
     });
   });
 
+  // APIs for the QR based booth
   app.get('/api/get_access_token', function(req, res) {
     console.log("Received new API call to /api/get_access_token at " + new Date());
 
@@ -110,13 +111,50 @@ app.configure(function() {
     }
   });
 
-  app.get('/api/get_device_auth_code', function(req, res) {
-    console.log("Received new API call to /api/get_device_auth_code");
+  // APIs for the Device Auth based booth
+
+  /*
+   * This API checks the DB for the 'external UID' - a unique token from an external
+   * system like a loyalty card scheme etc.
+   *
+   * If it finds the external UID in the DB, it checks the access token is still valid
+   * and, if so, returns it. Otherwise it generates a new Device Auth code from Facebook
+   * and returns that
+   */
+  app.get('/api/get_access_token_or_device_auth_code', function(req, res) {
+    console.log("Received new API call to /api/get_access_token_or_device_auth_code");
 
     var externalUID = req.query["externalUID"];
     var scope = "user_photos,publish_actions";
 
     if (externalUID) {
+      // First, check to see if this externalUID is in our database. And if so, if it works :)
+      db.all("SELECT fbid AS fb_id, access_token AS token FROM user WHERE external_uid = $externalUID", {
+        $externalUID: externalUID
+      }, function(err, rows) {
+        if (err || rows.length > 1) {
+          console.log("ERror retrieving external UID");
+          if (rows) {
+            console.log("DB Call returned " + rows.length + " rows");
+          }
+          if (err) {
+            console.log(err);
+          }
+          sendInternalServerError(res);
+        } else if (rows.length == 1) {
+          res.header('Content-Type', 'text/json');
+          res.send(JSON.stringify({
+            success: "true",
+            data: {
+              access_token: rows[0].token
+            } 
+          }));
+
+          return;
+        }
+      });
+
+      console.log("Didn't find external UID in DB. Creating a new one...");
       async.waterfall([
         function(cb){
           cb(null, FACEBOOK_APP_ID, scope);
@@ -140,6 +178,10 @@ app.configure(function() {
     }
   });
 
+  /*
+   * This API requests the status of the Device Auth verification code from Facebook.
+   * When the user has registered their code it returns the access token
+   */
   app.get('/api/check_for_access_token', function(req, res) {
     console.log("Received new API call to /api/check_for_access_token");
 
@@ -188,6 +230,9 @@ app.configure('prod', function(){
     app.use(express.errorHandler()); 
 });
 
+/*
+ * Let the client code handle the request
+ */
 function sendToBackbone(req, res) {
   res.render('index', {
     fb_app_id       : FACEBOOK_APP_ID,
@@ -195,8 +240,10 @@ function sendToBackbone(req, res) {
   });
 };
 
+/*
+ * Decode a Facebook signed request
+ */
 function decodeSignedRequest(signedRequest, callback) {
-    // Decode signed Request
     if (signedRequest) {
       var index = signedRequest.indexOf(".");
       if (index > 0) {
@@ -259,6 +306,12 @@ function decodeSignedRequest(signedRequest, callback) {
     }
 };
 
+/*
+ * Attempts to extend the Facebook access token 
+ * (https://developers.facebook.com/docs/howtos/login/extending-tokens/)
+ *
+ * If the request fails, simply return the original token
+ */
 function extendAccessToken(fbId, accessToken, expires, callback) {
   var params = {
     client_id         : config.app.app_id,
@@ -282,14 +335,17 @@ function extendAccessToken(fbId, accessToken, expires, callback) {
   });
 };
 
+/*
+ * Generate a hash code (as used in the QR booth) from the users FBID
+ */
 function generateHashCode(fbId, accessToken, expires, callback) {
   // Extract access token and generate our code
   var encodedCode = crypto.createHmac('SHA256', SECRET).update(fbId).digest('base64');
 
-  callback(null, fbId, accessToken, expires, encodedCode);
+  callback(null, fbId, accessToken, expires, encodedCode, null);
 };
 
-function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, hash, cb) {
+function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, hash, externalUID, cb) {
   db.get("SELECT count(*) AS total FROM user WHERE fbid = $fb_id", {
     $fb_id: fb_id
   }, function(err, result) {
@@ -299,11 +355,12 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
     } else if (result.total == 0) {
       // Create a new row
       console.log('Creating new row in Database for user ' + fb_id);
-      db.run("INSERT INTO user (fbid, access_token, access_token_expires, hash) VALUES ($fb_id, $access_token, $access_token_expires, $hash)", {
+      db.run("INSERT INTO user (fbid, access_token, access_token_expires, hash, external_uid) VALUES ($fb_id, $access_token, $access_token_expires, $hash, $externalUID)", {
         $fb_id: fb_id,
         $access_token: access_token,
         $access_token_expires: access_token_expires,
-        $hash: hash
+        $hash: hash,
+        $externalUID: externalUID
       }, function(err) {
         if (err) cb("Error saving to database");
         else cb(null, hash);
@@ -311,11 +368,12 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
     } else {
       // Update row
       console.log('Updating user ' + fb_id + ' in Database');
-      db.run("UPDATE user SET fbid = $fb_id, access_token = $access_token, access_token_expires = $access_token_expires, hash = $hash WHERE fbid = $fb_id", {
+      db.run("UPDATE user SET fbid = $fb_id, access_token = $access_token, access_token_expires = $access_token_expires, hash = $hash, external_uid = $externalUID WHERE fbid = $fb_id", {
         $fb_id: fb_id,
         $access_token: access_token,
         $access_token_expires: access_token_expires,
-        $hash: hash
+        $hash: hash,
+        $externalUID: externalUID
       }, function(err) {
         if (err) cb("Error saving to database");
         else cb(null, hash);
@@ -324,7 +382,7 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
   });
 };
 
-function sendAccessToken(err, encodedCode, res) {
+function sendHashCode(err, encodedCode, res) {
   if (err) {
     console.log(err);
     sendInternalServerError(res);
@@ -357,7 +415,6 @@ function sendError(res, message, statuscode) {
   res.write(JSON.stringify(response));
 }
 
-// sigh no ipv6
 // Do some shuffling for heroku vs localhost
 var port, domain;
 port = process.env.PORT;

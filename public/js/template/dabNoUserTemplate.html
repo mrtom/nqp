@@ -10,19 +10,20 @@
   <div class="row-fluid">
     <div class="span6 offset3 well">
       <p>This is a demonstration of using <a href="https://developers.facebook.com/docs/howtos/login/devices/" target="blank">Facebook Device Auth</a> to integrate Facebook Platform with your existing loyalty or customer ID system. However, because this is just an example we don't have an existing loyalty system :)</p>
-      <p>Let's assume you have a store card for NQP, and there's a barcode scanner attached to this computer. You'd be asked to scan the card. Hit the button below to simulate scanning your card...</p>
-    </div>
-  </div>
+      <p>Let's assume you have a store card for NQP, and there's a barcode scanner attached to this computer. You'd be asked to scan the card. Hit the button below to simulate scanning your card. If you did that before, paste the code you were given into the input box below first and we'll reuse it</p>
 
-  <div id="scanCardRow" class="row-fluid">
-    <div class="span4 offset4 center">
-      <button id="scanCard" class="btn btn-large btn-inverse" type="button">Scan Card</button>
-    </div>
-  </div>
+      <div id="scanCardRow" class="center">
+        <form class="form-inline">
+          <div class="input-append">
+            <input id="cardNumber" type="text" class="input-xlarge" placeholder="If you have a code, enter it here">
+            <button id="scanCard" class="btn btn-inverse" type="button">Scan Card</button>
+          </div>
+        </form>
+      </div>
 
-  <div id="externalUIDRow" class="row-fluid">
-    <div class="span6 offset3 well center">
-      <h5 id="externalUID">Your card has ID <%= externalUID %></h5>
+      <div id="externalUIDRow" class="center">
+        <h5 id="externalUID">Your card has ID <%= externalUID %>. Save this somewhere if you'd like to reuse it later.</h5>
+      </div>
     </div>
   </div>
 
