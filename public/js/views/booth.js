@@ -52,8 +52,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
       // Turn on bootstrap data-api
       $('body').on('.data-api');
 
-      console.log(this.model.attributes);
-
       if (this.options.code) {
         // We already have the user code. Just render the user page
         // This is only used for quick access during debugging
@@ -197,7 +195,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
     },
 
     handleRead: function(value) {
-      console.debug(value);
       $.ajax({
         url: "/api/get_access_token",
         context: this,

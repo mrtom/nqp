@@ -93,7 +93,7 @@ app.configure(function() {
 
     var hash = req.query["code"];
     if (hash) {
-      db.all("SELECT fbid AS fb_id, access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash", {
+      db.all("SELECT fbid AS fb_id, access_token AS token, access_token_expires AS expires FROM user WHERE hash = $hash AND access_token IS NOT NULL", {
         $hash: hash
       }, function(err, rows) {
         if (err || rows.length > 1) {
