@@ -22,7 +22,7 @@ In the first deomonstration, a person can browse to the site (on their phone or 
  * Hit the 'Scan Card button' to fake a card scan
  * Follow the on-screen instructions to complete the Facebook Login for Devices Flow
 
-> ![Scan External ID](https://github.com/mrtom/nqp/raw/master/docs/images/InputExternalCode.png  "Scan External ID") ![Show Device Auth Details](https://github.com/mrtom/nqp/raw/master/docs/images/ShowUserDeviceAuthDetails.png "Show User Device Auth Details") ![Personalised Experience](https://github.com/mrtom/nqp/raw/master/docs/images/BoothPersonalisesExperience.png "Personalised Experience")
+> ![Scan External ID](https://github.com/mrtom/nqp/raw/master/docs/images/InputExternalID.png  "Scan External ID") ![Show Device Auth Details](https://github.com/mrtom/nqp/raw/master/docs/images/ShowUserDeviceAuthDetails.png "Show User Device Auth Details") ![Personalised Experience](https://github.com/mrtom/nqp/raw/master/docs/images/BoothPersonalisesExperience.png "Personalised Experience")
 
 ## Want to run locally?
 ## Good! It's easy. Simply:
