@@ -21,7 +21,6 @@
 var SECRET = "fcda08e9fa30627468a998425ec6a988";
 
 var express = require('express'),
-    sessions = require('cookie-sessions'),
     uuid    = require('node-uuid'),
     config  = require('./config'),
     crypto  = require('crypto'),
