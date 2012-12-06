@@ -321,8 +321,7 @@ app.configure('prod', function(){
  */
 function sendToBackbone(req, res) {
   res.render('index', {
-    fb_app_id       : FACEBOOK_APP_ID,
-    use_device_auth : config.use_device_auth
+    fb_app_id       : FACEBOOK_APP_ID
   });
 };
 
