@@ -209,7 +209,6 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
     },
 
     handleReceiveAccessToken: function(access_token) {
-      console.log('Handing access token ' + access_token);
       this.model.set('user', {
         "access_token": access_token
       });

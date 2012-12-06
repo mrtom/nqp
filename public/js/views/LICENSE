@@ -1,0 +1,16 @@
+The code in this directory is licenses under the terms of the original author, or the Apache2 License for code not from other authors
+
+From other authors:
+backbone:   Custom  - https://github.com/documentcloud/backbone/blob/master/LICENSE
+bootstrap:  Apache2 - https://github.com/twitter/bootstrap/wiki/License
+jquery:     MIT     - http://jquery.org/license/
+modernizr:  MIT     - http://modernizr.com/license/
+qr_reader:  Apache2 - https://github.com/LazarSoft/jsqrcode/blob/37c0f7dd5e854fa3c5f01f23f5c886968b64dca7/COPYING
+qrcode:     MIT     - (http://opensource.org/licenses/mit-license.php)
+swfobject:  MIT     - (http://opensource.org/licenses/mit-license.php)
+requirejs:  BSD+MIT - https://github.com/jrburke/requirejs/blob/master/LICENSE
+underscore: Custom  - https://github.com/documentcloud/underscore/blob/master/LICENSE
+
+New:
+fb.js
+html5-webcam.js
