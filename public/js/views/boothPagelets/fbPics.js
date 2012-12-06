@@ -24,7 +24,11 @@ function($, _, Backbone, Masonry, Booth, BaseView, fbPicsTemplate) {
     className: "fbPics",
 
     initialize: function() {
-      this.fetchRecentPics();
+      if (!this.model.get('fb_pics')) {
+        this.fetchRecentPics();
+      } else {
+        this.render();
+      }
     },
 
     render: function() {

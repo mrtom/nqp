@@ -53,10 +53,7 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
 
       if (username) {
         $(this.el).html(this.boothWithUserTemplate(this.model.toJSON()));
-
-        if (!this.pageletsInited) {
-          this.initPagelets();
-        }
+        this.renderPagelets();
       } else {
         $(this.el).html(this.dabNoUserTemplate(this.model.toJSON()));
 
@@ -119,7 +116,12 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
         console.log("Failed to get device auth code from Facebook");
         console.log(r);
       })).done(_.bind(function(r){
-        this.deviceAuthCodeReceived(r);
+        console.log(r);
+        if (r.data && r.data.access_token) {
+          this.handleReceiveAccessToken(r.data.access_token);
+        } else {
+          this.deviceAuthCodeReceived(r);
+        }
       }, this));    
     },
 
@@ -141,7 +143,7 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
 
     checkFacebookForUpdateFromUser: function() {
       $.ajax({
-        url: "/api/check_for_access_token",
+        url: "/api/check_device_auth_status",
         context: this,
         type: "GET",
         data: "verificationCode="+this.model.get('deviceAuthVerificationCode')
@@ -185,7 +187,7 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
       this.model.set("fadeNode", "");
     },
 
-    initPagelets: function() {
+    renderPagelets: function() {
       // Add in the pagelets
       this.appUsersPagelet = new AppUsersView({
         el: this.$('.appUsers'),
@@ -204,11 +206,10 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
         model: this.model,
         router: this.options.router
       });
-
-      this.pageletsInited = true;
     },
 
     handleReceiveAccessToken: function(access_token) {
+      console.log('Handing access token ' + access_token);
       this.model.set('user', {
         "access_token": access_token
       });
@@ -231,6 +232,15 @@ function($, _, Backbone, Bootstrap, Booth, BaseView, AppUsersView, FBPicsView, T
           "callback": callbackName
         }
       });
+    },
+
+    logOutBooth: function() {
+      $.ajax({
+        url: "/api/logout"
+      });
+
+      this.model.reset();
+      this.render();
     }
     
   });

@@ -23,7 +23,11 @@ function($, _, Backbone, Booth, BaseView, appUsersTemplate) {
     className: "appUsers",
 
     initialize: function() {
-      this.fetchFriendsWhoUseApp();
+      if (!this.model.get('friends')) {
+        this.fetchFriendsWhoUseApp();
+      } else {
+        this.render();
+      }
     },
 
     render: function() {

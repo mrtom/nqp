@@ -17,6 +17,7 @@
 var SECRET = "fcda08e9fa30627468a998425ec6a988";
 
 var express = require('express'),
+    sessions = require('cookie-sessions'),
     uuid    = require('node-uuid'),
     config  = require('./config'),
     crypto  = require('crypto'),
@@ -37,8 +38,11 @@ if (!FACEBOOK_SECRET || !FACEBOOK_APP_ID) {
 
 app.configure(function() {
   app.use(express.bodyParser());
-  app.use(express.cookieParser());
-  express.session({ secret: SECRET});
+  app.use(express.cookieParser(SECRET));
+  app.use(express.session({
+    key: 'nqp',
+    secret: SECRET
+  }));
 
   app.set("view options", { layout: false });
   app.set('views', __dirname + '/views');
@@ -46,7 +50,8 @@ app.configure(function() {
   app.get('/', sendToBackbone);
 
   app.use(express.static(__dirname + '/public'));
-  
+
+  // APIs for the QR based booth  
   app.post('/api/gen', function(req, res) {
     console.log("Received new API call to /api/gen at " + new Date());
     var signedRequest = req.param('signed_request');
@@ -65,7 +70,6 @@ app.configure(function() {
     });
   });
 
-  // APIs for the QR based booth
   app.get('/api/get_access_token', function(req, res) {
     console.log("Received new API call to /api/get_access_token at " + new Date());
 
@@ -127,46 +131,125 @@ app.configure(function() {
 
     var externalUID = req.query["externalUID"];
     var scope = "user_photos,publish_actions";
+    var session = req.session;
+
+    if (!session.user) {
+      session.user = {};
+    }
 
     if (externalUID) {
-      // First, check to see if this externalUID is in our database. And if so, if it works :)
-      db.all("SELECT fbid AS fb_id, access_token AS token FROM user WHERE external_uid = $externalUID", {
-        $externalUID: externalUID
-      }, function(err, rows) {
-        if (err || rows.length > 1) {
-          console.log("ERror retrieving external UID");
-          if (rows) {
-            console.log("DB Call returned " + rows.length + " rows");
-          }
-          if (err) {
-            console.log(err);
-          }
-          sendInternalServerError(res);
-        } else if (rows.length == 1) {
-          res.header('Content-Type', 'text/json');
-          res.send(JSON.stringify({
-            success: "true",
-            data: {
-              access_token: rows[0].token
-            } 
-          }));
+      // First, check to see if this externalUID is in our database, and associated with an access token
+      // If so, check the access token is still valid
+      // Finally, return access token (if valid), or go through device auth flow if not
 
-          return;
+      async.series({
+        checkForExistingValidToken: function(cb) {
+          async.waterfall([
+            // Lookup results from db
+            function(inner_callback) {
+              db.all("SELECT fbid AS fb_id, access_token AS token FROM user WHERE external_uid = $externalUID", {
+                $externalUID: externalUID
+              }, inner_callback); 
+            },
+            // Check for data errors in db
+            function(rows, inner_callback) {
+              if (rows.length > 1) {
+                inner_callback("Error retrieving external UID. DB Call returned " + rows.length + " rows");
+              } else if (rows.length == 1 && rows[0].fb_id && rows[0].token) {
+                // Pass token to getUserDetails
+                inner_callback(null, rows[0].fb_id, rows[0].token);
+              } else {
+                // Details not found in database. Call outer (series) callback with error
+                // Don't called the inner callback, we're done with this inner waterfall
+                cb("User not found in database");
+              }
+            },
+            function(fbid, access_token, inner_callback) {
+              // The user was found in the DB. Check the access token still works
+              // If the user lookup fails we want to hit the outer (series) callback,
+              // not the inner (waterfall) one
+              dab.getUserDetails(null, fbid, access_token, null, function(err) {
+                if (err) cb(err);
+                else inner_callback(null, access_token);
+              });              
+            }
+          ],
+          // Final callback for inner Waterfall flow
+          function(err, access_token){
+            if (err) {
+              sendInternalServerError(res, err);
+            } else {
+              res.header('Content-Type', 'text/json');
+              res.send(JSON.stringify({
+                success: "true",
+                data: {
+                  access_token: access_token
+                } 
+              }));
+            }
+          });
         }
-      });
+      // Final callback for outer Series flow
+      }, function(err){
+        if (err) {
+          // Did not find a valid access token, so generate a device auth code
+          dab.generateCode(FACEBOOK_APP_ID, scope, function(err, response) {
+            if (err) {
+              console.log(err);
+              sendInternalServerError(res);
+            } else {
+              // Set external UID as key in session
+              session.user.externalUID = externalUID;
+              session.save();
 
-      console.log("Didn't find external UID in DB. Creating a new one...");
+              res.header('Content-Type', 'text/json');
+              res.send(JSON.stringify({
+                success: "true",
+                data: response
+              })); 
+            }
+          });
+        }
+      });      
+    } else {
+      sendInternalServerError(res);
+    }
+  });
+
+  /*
+   * This API requests the status of the Device Auth verification code from Facebook.
+   * When the user has registered their code it returns the access token
+   */
+  app.get('/api/check_device_auth_status', function(req, res) {
+    console.log("Received new API call to /api/check_device_auth_status");
+
+    var verificationCode = req.query["verificationCode"];
+    var session = req.session;
+
+    if (verificationCode) {
       async.waterfall([
         function(cb){
-          cb(null, FACEBOOK_APP_ID, scope);
+          cb(null, FACEBOOK_APP_ID, verificationCode);
         },
-        dab.generateCode
+        dab.pollFacebook,
+        dab.getUserDetails,
+        extendAccessToken
       ],
-      function(err, response) {
+      function(err, response, fb_id, access_token) {
         if (err) {
-          console.log(err);
-          sendInternalServerError(res);
+          // Let the client handle errors, and Facebook sends error codes to indicate the user hasn't authed yet :(
+          res.header('Content-Type', 'text/json');
+          res.send(JSON.stringify({
+            success: "false",
+            message: err.error.message
+          }));
         } else {
+          // First, save access token in database
+          if (session.user && session.user.externalUID) {
+            var nullFunc = function(){};
+            createOrUpdateUserRecord(fb_id, access_token, "", "", session.user.externalUID, nullFunc);
+          }
+
           res.header('Content-Type', 'text/json');
           res.send(JSON.stringify({
             success: "true",
@@ -179,41 +262,15 @@ app.configure(function() {
     }
   });
 
-  /*
-   * This API requests the status of the Device Auth verification code from Facebook.
-   * When the user has registered their code it returns the access token
-   */
-  app.get('/api/check_for_access_token', function(req, res) {
-    console.log("Received new API call to /api/check_for_access_token");
+  app.get('/api/logout', function(req, res) {
+    req.session.destroy(function(err) {
+      console.log("User logged out");
 
-    var verificationCode = req.query["verificationCode"];
+      if (err) sendInternalServerError();
 
-    if (verificationCode) {
-      async.waterfall([
-        function(cb){
-          cb(null, FACEBOOK_APP_ID, verificationCode);
-        },
-        dab.pollFacebook
-      ],
-      function(err, response) {
-        if (err) {
-          // Let the client handle errors
-          res.header('Content-Type', 'text/json');
-          res.send(JSON.stringify({
-            success: "false",
-            message: err.error.message
-          }));
-        } else {
-          res.header('Content-Type', 'text/json');
-          res.send(JSON.stringify({
-            success: "true",
-            data: response
-          }));        
-        }
-      });
-    } else {
-      sendInternalServerError(res);
-    }
+      res.status(200);
+      res.end();
+    });
   });
 
   app.use(function(req, res, next){
@@ -298,7 +355,7 @@ function decodeSignedRequest(signedRequest, callback) {
             access_token = qs.parse(r).access_token;
             expires = qs.parse(r).expires;
 
-            callback(null, data.user_id, access_token, expires);
+            callback(null, r, data.user_id, access_token, expires);
           });
         }
       }
@@ -313,7 +370,7 @@ function decodeSignedRequest(signedRequest, callback) {
  *
  * If the request fails, simply return the original token
  */
-function extendAccessToken(fbId, accessToken, expires, callback) {
+function extendAccessToken(response, fbId, accessToken, expires, callback) {
   var params = {
     client_id         : config.app.app_id,
     client_secret     : FACEBOOK_SECRET,
@@ -325,21 +382,21 @@ function extendAccessToken(fbId, accessToken, expires, callback) {
   request.on('fail', function(data) {
     var result = JSON.parse(data);
     console.log("Could not extend access token. Continuing with original");
-    callback(null, fbId, accessToken, expires);
+    callback(null, response, fbId, accessToken, expires);
   });
 
   request.on('success', function(r) {
     accessToken = qs.parse(r).access_token;
     expires = qs.parse(r).expires;
 
-    callback(null, fbId, accessToken, expires);
+    callback(null, response, fbId, accessToken, expires);
   });
 };
 
 /*
  * Generate a hash code (as used in the QR booth) from the users FBID
  */
-function generateHashCode(fbId, accessToken, expires, callback) {
+function generateHashCode(response, fbId, accessToken, expires, callback) {
   // Extract access token and generate our code
   var encodedCode = crypto.createHmac('SHA256', SECRET).update(fbId).digest('base64');
 
@@ -364,7 +421,7 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
         $externalUID: externalUID
       }, function(err) {
         if (err) cb("Error saving to database");
-        else cb(null, hash);
+        else cb(null, hash, externalUID);
       });
     } else {
       // Update row
@@ -377,7 +434,7 @@ function createOrUpdateUserRecord(fb_id, access_token, access_token_expires, has
         $externalUID: externalUID
       }, function(err) {
         if (err) cb("Error saving to database");
-        else cb(null, hash);
+        else cb(null, hash, externalUID);
       })
     }
   });

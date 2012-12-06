@@ -79,10 +79,7 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
 
       if (username) {
         $(this.el).html(this.boothWithUserTemplate(this.model.toJSON()));
-
-        if (!this.model.get('pageletsInited')) {
-          this.initPagelets();
-        }
+        this.renderPagelets();
       } else {
         $(this.el).html(this.boothNoUserTemplate());
         this.initCanvas();
@@ -178,7 +175,7 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
       return;
     },
 
-    initPagelets: function() {
+    renderPagelets: function() {
       // Add in the pagelets
       this.appUsersPagelet = new AppUsersView({
         el: this.$('.appUsers'),
@@ -197,8 +194,6 @@ function($, _, Backbone, Bootstrap, swfobject, qrcode, Booth, BaseView, AppUsers
         model: this.model,
         router: this.options.router
       });
-
-      this.model.set('pageletsInited', true);
     },
 
     handleRead: function(value) {

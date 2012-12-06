@@ -7,15 +7,27 @@ define([
 
 function($, _, Backbone) {
 
-  // Booth Model
+  // Device Auth Booth Model
   // ----------
 
   var Dab = Backbone.Model.extend({
 
+    defaults: {
+      pageletsInited: false,
+      externalUID: "",
+      deviceAuthCode: "",
+      deviceAuthVerificationURL: ""
+    },
+
     initialize: function() {
-      this.set("externalUID", "");
-      this.set("deviceAuthCode", "");
-      this.set("deviceAuthVerificationURL", "");
+    },
+
+    reset: function() {
+      this.clear();
+
+      for(var key in this.defaults) {
+        this.set(key, this.defaults[key]);
+      }
     }
   });
 
