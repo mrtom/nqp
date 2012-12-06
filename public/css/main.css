@@ -2,6 +2,11 @@
    Author's custom styles
    ========================================================================== */
 
+body {
+  background-image: url('/img/background.png');
+  background-repeat: repeat;
+}
+
 .navbar .user-details {
   margin-top: 10px; /* Can probably fix this better some other way? */
 }
